@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		ABCB3FF62FF619D300FE290F /* Salseros_App */ = {
+		ABCB40422FFC59DA00FE290F /* Salseros_App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Salseros_App;
 			sourceTree = "<group>";
@@ -32,7 +32,7 @@
 		ABCB3FEB2FF619D300FE290F = {
 			isa = PBXGroup;
 			children = (
-				ABCB3FF62FF619D300FE290F /* Salseros_App */,
+				ABCB40422FFC59DA00FE290F /* Salseros_App */,
 				ABCB3FF52FF619D300FE290F /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,7 +61,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				ABCB3FF62FF619D300FE290F /* Salseros_App */,
+				ABCB40422FFC59DA00FE290F /* Salseros_App */,
 			);
 			name = Salseros_App;
 			packageProductDependencies = (
