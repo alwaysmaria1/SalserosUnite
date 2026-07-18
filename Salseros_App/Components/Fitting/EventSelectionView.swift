@@ -46,20 +46,24 @@ struct EventSelectionView: View {
                         } label: {
                             HStack {
                                 Text(event.logDisplayName)
-                                    .foregroundStyle(.primary)
+                                    .font(.cardMeta)
+                                    .foregroundStyle(Color.ink)
 
                                 Spacer()
 
                                 Image(systemName: "chevron.right")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                                    .font(.eyebrow)
+                                    .foregroundStyle(Color.teal)
                             }
                         }
+                        .listRowBackground(Color.cardCream)
                     }
                 }
             }
         }
         .listStyle(.insetGrouped)
+        .scrollContentBackground(.hidden)
+        .espressoBackground()
     }
 }
 

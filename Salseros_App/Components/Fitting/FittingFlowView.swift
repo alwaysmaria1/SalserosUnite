@@ -20,6 +20,8 @@ struct FittingFlowView: View {
     @State private var verdict: Verdict = .rack
     @State private var vibeTags: Set<Vibe> = []
     @State private var danceStylesTonight: Set<DanceStyle> = []
+    @State private var difficulties: Set<Difficulty> = []
+    @State private var leadFollowRatio: LeadFollowRatio = .balanced
     @State private var note = ""
     @State private var confirmationFitting: Fitting?
     @State private var didPrepareDraft = false
@@ -52,19 +54,16 @@ struct FittingFlowView: View {
                     verdict: $verdict,
                     vibeTags: $vibeTags,
                     danceStylesTonight: $danceStylesTonight,
+                    difficulties: $difficulties,
+                    leadFollowRatio: $leadFollowRatio,
                     note: $note,
+                    onCancel: { dismiss() },
                     onSave: saveFitting
                 )
-                .toolbar {
-                    ToolbarItem(placement: .cancellationAction) {
-                        Button("Cancel") {
-                            dismiss()
-                        }
-                    }
-                }
             }
         }
         .onAppear(perform: prepareDraft)
+        .espressoBackground()
     }
 
     private func prepareDraft() {
@@ -76,6 +75,8 @@ struct FittingFlowView: View {
             verdict = .rack
             vibeTags = []
             danceStylesTonight = []
+            difficulties = []
+            leadFollowRatio = .balanced
             note = ""
             return
         }
@@ -84,6 +85,8 @@ struct FittingFlowView: View {
         verdict = fittingToEdit.verdict
         vibeTags = fittingToEdit.vibeTags
         danceStylesTonight = fittingToEdit.danceStylesTonight
+        difficulties = fittingToEdit.difficulties
+        leadFollowRatio = fittingToEdit.leadFollowRatio
         note = fittingToEdit.note
     }
 
@@ -95,6 +98,8 @@ struct FittingFlowView: View {
             fittingToEdit.verdict = verdict
             fittingToEdit.vibeTags = vibeTags
             fittingToEdit.danceStylesTonight = danceStylesTonight
+            fittingToEdit.difficulties = difficulties
+            fittingToEdit.leadFollowRatio = leadFollowRatio
             fittingToEdit.note = note
             fitting = fittingToEdit
         } else {
@@ -104,6 +109,8 @@ struct FittingFlowView: View {
                 verdict: verdict,
                 vibeTags: vibeTags,
                 danceStylesTonight: danceStylesTonight,
+                difficulties: difficulties,
+                leadFollowRatio: leadFollowRatio,
                 note: note,
                 loggedByName: UserProfile.currentUserDisplayName
             )

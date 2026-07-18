@@ -16,18 +16,16 @@ struct RSVPButton: View {
                 onToggle()
             } label: {
                 Label("GOING", systemImage: "checkmark")
-                    .font(.subheadline.weight(.semibold))
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PillActionStyle())
             .accessibilityLabel("Cancel RSVP")
         } else {
             Button {
                 onToggle()
             } label: {
                 Text("RSVP")
-                    .font(.subheadline.weight(.semibold))
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(OutlinePillStyle())
             .accessibilityLabel("RSVP")
         }
     }

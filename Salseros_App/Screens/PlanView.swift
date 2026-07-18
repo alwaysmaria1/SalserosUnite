@@ -53,13 +53,19 @@ struct PlanView: View {
 
     var body: some View {
         NavigationStack {
-            List {
-                displayModeSection
+            ScrollView {
+                VStack(alignment: .leading, spacing: 24) {
+                    header
                 filtersSection
                 displayContent
+                }
+                .padding(.horizontal, 24)
+                .padding(.top, 28)
+                .padding(.bottom, 24)
             }
-            .navigationTitle("Upcoming")
-            .listStyle(.insetGrouped)
+            .espressoBackground()
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $selectedEventForDetails) { event in
                 EventDetailsScreen(
                     event: event,
@@ -72,16 +78,25 @@ struct PlanView: View {
                 fittingFlow(for: sheet)
             }
         }
+        .espressoBackground()
     }
 
-    private var displayModeSection: some View {
-        Section {
+    private var header: some View {
+        HStack(alignment: .center) {
+            Text("Upcoming")
+                .font(.displaySerif)
+                .foregroundStyle(Color.ivory)
+
+            Spacer(minLength: 16)
+
             Picker("Display", selection: $selectedDisplayMode) {
                 ForEach(PlanDisplayMode.allCases) { mode in
-                    Text(mode.title).tag(mode)
+                    Text(mode.title.uppercased()).tag(mode)
                 }
             }
             .pickerStyle(.segmented)
+            .frame(width: 178)
+            .tint(Color.ivory)
         }
     }
 
@@ -117,59 +132,74 @@ struct PlanView: View {
                 systemImage: "line.3.horizontal.decrease.circle",
                 description: Text("Try clearing a filter or choosing a different vibe.")
             )
+            .padding()
+            .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
         }
     }
 
     private var filtersSection: some View {
-        Section {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(spacing: 8) {
-                    Menu {
-                        Button("Any city") { selectedCity = nil }
+        ScrollView(.horizontal, showsIndicators: false) {
+            HStack(spacing: 12) {
+                Menu {
+                    Button("Any city") { selectedCity = nil }
 
-                        ForEach(cityOptions, id: \.self) { city in
-                            Button(city) { selectedCity = city }
-                        }
-                    } label: {
-                        FilterChip(title: selectedCity ?? "City", isActive: selectedCity != nil)
+                    ForEach(cityOptions, id: \.self) { city in
+                        Button(city) { selectedCity = city }
                     }
-
-                    ForEach(Vibe.allCases) { vibe in
-                        Button {
-                            toggleVibe(vibe)
-                        } label: {
-                            FilterChip(title: vibe.rawValue, isActive: selectedVibes.contains(vibe))
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    ForEach(Difficulty.allCases) { difficulty in
-                        Button {
-                            toggleDifficulty(difficulty)
-                        } label: {
-                            FilterChip(title: difficulty.shortTitle, isActive: selectedDifficulty == difficulty)
-                        }
-                        .buttonStyle(.plain)
-                    }
-
-                    if hasActiveFilters {
-                        Button("Clear") {
-                            clearFilters()
-                        }
-                        .font(.subheadline.weight(.semibold))
-                    }
+                } label: {
+                    Label(selectedCity ?? "City", systemImage: "mappin.circle")
+                        .font(.eyebrow)
+                        .foregroundStyle(selectedCity == nil ? Color.ink : Color.ivory)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 10)
+                        .background(selectedCity == nil ? Color.ivory : Color.teal, in: Capsule())
                 }
-                .padding(.vertical, 4)
+
+                ForEach(Vibe.allCases) { vibe in
+                    Button {
+                        toggleVibe(vibe)
+                    } label: {
+                        FilterChip(title: vibe.rawValue, isActive: selectedVibes.contains(vibe))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                ForEach(Difficulty.allCases) { difficulty in
+                    Button {
+                        toggleDifficulty(difficulty)
+                    } label: {
+                        FilterChip(title: difficulty.shortTitle, isActive: selectedDifficulty == difficulty)
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if hasActiveFilters {
+                    Button("Clear") {
+                        clearFilters()
+                    }
+                    .font(.eyebrow)
+                    .foregroundStyle(Color.ivory)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
+                    .background(Color.rust, in: Capsule())
+                }
             }
+            .padding(.vertical, 2)
         }
     }
 
     @ViewBuilder
     private func eventSection(_ title: String, events: [Event]) -> some View {
         if !events.isEmpty {
-            Section(title) {
+            VStack(alignment: .leading, spacing: 12) {
+                Text(title)
+                    .font(.eyebrow)
+                    .foregroundStyle(Color.ivory.opacity(0.82))
+
                 ForEach(events) { event in
                     eventRow(event)
+                        .padding(16)
+                        .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
                 }
             }
         }

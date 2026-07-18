@@ -32,14 +32,14 @@ struct CompactEventCard: View {
         HStack(alignment: .center, spacing: 12) {
             VStack(alignment: .leading, spacing: 4) {
                 Text(event.name)
-                    .font(.headline)
-                    .foregroundStyle(.primary)
+                    .font(.cardTitle)
+                    .foregroundStyle(Color.ink)
                     .lineLimit(2)
 
                 if !subtitle.isEmpty {
                     Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(.cardMeta)
+                        .foregroundStyle(Color.ink.opacity(0.62))
                         .lineLimit(1)
                 }
             }
@@ -60,5 +60,7 @@ struct CompactEventCard: View {
             }
         }
         .padding(.vertical, 4)
+        .padding(.horizontal, 4)
+        .listRowBackground(Color.cardCream)
     }
 }

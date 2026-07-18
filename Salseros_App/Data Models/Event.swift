@@ -59,8 +59,14 @@ final class Event {
         //groups identical vibes together
         let counts: [Vibe: Int] = Dictionary(grouping: allTags, by: { $0 })
             .mapValues { $0.count }
-        //sorts the vibes, desc
-        let sorted = counts.sorted { $0.value > $1.value }
+        // Sorts by count first, then alphabetically so equal-count tags do not jump around.
+        let sorted = counts.sorted {
+            if $0.value == $1.value {
+                return $0.key.rawValue < $1.key.rawValue
+            }
+
+            return $0.value > $1.value
+        }
         return sorted.map { $0.key }
     }
 

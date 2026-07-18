@@ -13,7 +13,10 @@ struct MainTabView: View {
 
     var body: some View {
         TabView(selection: $selectedTab) {
-            HomeView()
+            HomeView(
+                onLogNight: { selectedTab = .search },
+                onPlan: { selectedTab = .plan }
+            )
                 .tabItem { Label("Home", systemImage: "house") }
                 .tag(AppTab.home)
 
@@ -32,6 +35,7 @@ struct MainTabView: View {
                 .tabItem { Label("You", systemImage: "person") }
                 .tag(AppTab.profile)
         }
+        .tint(Color.teal)
     }
 }
 

@@ -36,27 +36,40 @@ struct ProfileView: View {
             List {
                 Section("Profile") {
                     LabeledContent("Name", value: profile?.name ?? "You")
+                        .font(.cardMeta)
                     LabeledContent("Nights this year", value: "\(nightsThisYear)")
+                        .font(.cardMeta)
                 }
+                .listRowBackground(Color.cardCream)
 
                 if let profile, !profile.preferredStyles.isEmpty {
                     Section("Preferred styles") {
                         ForEach(profile.preferredStyles.map(\.rawValue).sorted(), id: \.self) { style in
                             Text(style)
+                                .font(.cardMeta)
+                                .foregroundStyle(Color.ink)
                         }
                     }
+                    .listRowBackground(Color.cardCream)
                 }
 
                 if let profile, !profile.friendNames.isEmpty {
                     Section("Friends") {
                         ForEach(profile.friendNames, id: \.self) { friendName in
                             Text(friendName)
+                                .font(.cardMeta)
+                                .foregroundStyle(Color.ink)
                         }
                     }
+                    .listRowBackground(Color.cardCream)
                 }
             }
             .navigationTitle("Noe's Profile")
+            .navigationBarTitleDisplayMode(.inline)
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .espressoBackground()
         }
+        .espressoBackground()
     }
 }

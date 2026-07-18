@@ -21,24 +21,24 @@ struct CalendarDayButton: View {
         Button(action: onSelect) {
             VStack(spacing: 3) {
                 Text("\(dayNumber)")
-                    .font(.subheadline.weight(isSelected || isToday ? .bold : .regular))
+                    .font(.cardMeta.weight(isSelected || isToday ? .bold : .regular))
 
                 if eventCount > 0 {
                     Text("\(eventCount)")
-                        .font(.caption2.weight(.bold))
-                        .foregroundStyle(isSelected ? .white : Color.accentColor)
+                        .font(.eyebrow)
+                        .foregroundStyle(isSelected ? Color.ivory : Color.rust)
                 } else {
                     Text(" ")
-                        .font(.caption2)
+                        .font(.eyebrow)
                 }
             }
-            .foregroundStyle(isSelected ? .white : .primary)
+            .foregroundStyle(isSelected ? Color.ivory : Color.ink)
             .frame(maxWidth: .infinity, minHeight: 44)
             .background(backgroundColor, in: RoundedRectangle(cornerRadius: 8))
             .overlay {
                 if isToday && !isSelected {
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.accentColor, lineWidth: 1)
+                        .stroke(Color.rust, lineWidth: 1)
                 }
             }
         }
@@ -48,14 +48,14 @@ struct CalendarDayButton: View {
 
     private var backgroundColor: Color {
         if isSelected {
-            return .accentColor
+            return Color.teal
         }
 
         if eventCount > 0 {
-            return Color.accentColor.opacity(0.12)
+            return Color.rust.opacity(0.16)
         }
 
-        return Color.secondary.opacity(0.08)
+        return Color.cardCream
     }
 
     private var accessibilityLabel: String {

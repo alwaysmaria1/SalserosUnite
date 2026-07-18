@@ -14,8 +14,10 @@ struct PlaceholderView: View {
     var body: some View {
         NavigationStack {
             Text(message)
-                .foregroundStyle(.secondary)
+                .font(.cardMeta)
+                .foregroundStyle(Color.mutedIvory)
                 .navigationTitle(title)
         }
+        .espressoBackground()
     }
 }

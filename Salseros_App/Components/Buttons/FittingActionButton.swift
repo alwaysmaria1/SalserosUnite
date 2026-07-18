@@ -16,10 +16,10 @@ struct FittingActionButton: View {
             handleTap()
         } label: {
             Image(systemName: iconName)
-                .font(.title3)
+                .font(.title.weight(.semibold))
         }
         .buttonStyle(.plain)
-        .foregroundStyle(Color.accentColor)
+        .foregroundStyle(Color.teal)
         .accessibilityLabel(accessibilityLabel)
     }
 

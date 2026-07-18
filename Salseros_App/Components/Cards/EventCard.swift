@@ -52,17 +52,15 @@ struct EventCard: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
                 Text(event.name)
-                    .font(.headline)
-                    .fontWeight(.bold)
-                    .foregroundStyle(.primary)
+                    .font(.cardTitle)
+                    .foregroundStyle(Color.ink)
 
                 Spacer(minLength: 12)
 
                 if event.isFavorite {
                     Text("favorite")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundStyle(.secondary)
+                        .font(.eyebrow)
+                        .foregroundStyle(Color.rust)
                 }
 
                 FittingActionButton(
@@ -74,8 +72,8 @@ struct EventCard: View {
 
             if !subtitleParts.isEmpty {
                 Text(subtitleParts.joined(separator: " · "))
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.cardMeta)
+                    .foregroundStyle(Color.ink.opacity(0.62))
             }
 
             if !swatches.isEmpty {
@@ -98,6 +96,7 @@ struct EventCard: View {
             }
         }
         .padding(.vertical, 8)
+        .listRowBackground(Color.cardCream)
     }
 
     @ViewBuilder
@@ -106,12 +105,12 @@ struct EventCard: View {
 
         if visibleFriends.isEmpty && additionalGoingCount == 0 {
             Text("No one going yet")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.cardMeta)
+                .foregroundStyle(Color.ink.opacity(0.62))
         } else {
             Text(summaryText(for: visibleFriends))
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+                .font(.cardMeta)
+                .foregroundStyle(Color.ink.opacity(0.62))
         }
     }
 
@@ -140,18 +139,18 @@ private enum EventSwatchStyle: String {
     var foregroundColor: Color {
         switch self {
         case .level:
-            .white
+            Color.ivory
         case .vibe:
-            .primary
+            Color.teal
         }
     }
 
     var backgroundColor: Color {
         switch self {
         case .level:
-            .green
+            Color.teal
         case .vibe:
-            .orange.opacity(0.18)
+            Color.rust.opacity(0.18)
         }
     }
 }
@@ -161,7 +160,7 @@ private struct EventSwatchView: View {
 
     var body: some View {
         Text(swatch.title)
-            .font(.caption.weight(.semibold))
+            .font(.eyebrow)
             .foregroundStyle(swatch.style.foregroundColor)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)

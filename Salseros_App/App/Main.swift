@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 @main
 struct SalsaLogApp: App {
@@ -33,6 +34,18 @@ struct SalsaLogApp: App {
             }
         }
     }()
+
+    init() {
+        let navigationBarAppearance = UINavigationBarAppearance()
+        navigationBarAppearance.configureWithOpaqueBackground()
+        navigationBarAppearance.backgroundColor = UIColor(Color.espresso)
+        navigationBarAppearance.titleTextAttributes = [.foregroundColor: UIColor(Color.ivory)]
+        navigationBarAppearance.largeTitleTextAttributes = [.foregroundColor: UIColor(Color.ivory)]
+
+        UINavigationBar.appearance().standardAppearance = navigationBarAppearance
+        UINavigationBar.appearance().scrollEdgeAppearance = navigationBarAppearance
+        UINavigationBar.appearance().compactAppearance = navigationBarAppearance
+    }
 
     var body: some Scene {
         WindowGroup {

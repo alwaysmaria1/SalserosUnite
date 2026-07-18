@@ -29,9 +29,14 @@ struct TagChip: View {
 
     var body: some View {
         Text(title)
-            .font(.caption.weight(.semibold))
+            .font(.eyebrow)
+            .foregroundStyle(Color.teal)
             .padding(.horizontal, 10)
             .padding(.vertical, 6)
-            .background(.thinMaterial, in: Capsule())
+            .background(Color.ivory.opacity(0.14), in: Capsule())
+            .overlay {
+                Capsule()
+                    .stroke(Color.teal.opacity(0.35), lineWidth: 1)
+            }
     }
 }

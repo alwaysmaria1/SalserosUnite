@@ -38,17 +38,22 @@ struct SearchView: View {
                         systemImage: "magnifyingglass",
                         description: Text("Try a different event, venue, or city.")
                     )
+                    .listRowBackground(Color.cardCream)
                 } else {
                     Section("Events") {
                         ForEach(filteredEvents) { event in
                             eventRow(event)
                         }
                     }
+                    .listRowBackground(Color.cardCream)
                 }
             }
             .navigationTitle("Search")
+            .navigationBarTitleDisplayMode(.inline)
             .searchable(text: $searchText, prompt: "Search events, venues, cities")
             .listStyle(.insetGrouped)
+            .scrollContentBackground(.hidden)
+            .espressoBackground()
             .navigationDestination(item: $selectedEventForDetails) { event in
                 EventDetailsScreen(
                     event: event,
@@ -61,6 +66,7 @@ struct SearchView: View {
                 fittingFlow(for: sheet)
             }
         }
+        .espressoBackground()
     }
 
     private func eventRow(_ event: Event) -> some View {

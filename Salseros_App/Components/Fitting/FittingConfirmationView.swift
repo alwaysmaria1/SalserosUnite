@@ -27,27 +27,26 @@ struct FittingConfirmationView: View {
 
             Image(systemName: "checkmark.circle.fill")
                 .font(.system(size: 72))
-                .foregroundStyle(.green)
+                .foregroundStyle(Color.teal)
 
             VStack(spacing: 10) {
                 Text(titleText)
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
+                    .font(.displaySerif)
+                    .foregroundStyle(Color.ivory)
                     .multilineTextAlignment(.center)
 
                 Text(venueName)
-                    .font(.title3)
-                    .foregroundStyle(.secondary)
+                    .font(.cardMeta)
+                    .foregroundStyle(Color.mutedIvory)
             }
 
             Button {
                 fitting.event.isFavorite = true
             } label: {
                 Label("MAKE IT A STANDING ORDER", systemImage: "heart")
-                    .font(.headline)
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.bordered)
+            .buttonStyle(OutlinePillStyle())
 
             Spacer()
 
@@ -55,11 +54,11 @@ struct FittingConfirmationView: View {
                 onDone()
             } label: {
                 Text("DONE")
-                    .font(.headline)
                     .frame(maxWidth: .infinity)
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(PillActionStyle())
         }
         .padding()
+        .espressoBackground()
     }
 }

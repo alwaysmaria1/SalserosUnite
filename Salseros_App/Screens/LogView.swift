@@ -27,5 +27,6 @@ struct LogView: View {
                 FittingFlowView(event: event)
             }
         }
+        .espressoBackground()
     }
 }

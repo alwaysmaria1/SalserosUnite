@@ -74,7 +74,8 @@ struct PlanCalendarView<EventRow: View>: View {
         if selectedDayEvents.isEmpty {
             Section(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day())) {
                 Text("No events this day")
-                    .foregroundStyle(.secondary)
+                    .font(.cardMeta)
+                    .foregroundStyle(Color.mutedIvory)
             }
         } else {
             Section(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()).uppercased()) {

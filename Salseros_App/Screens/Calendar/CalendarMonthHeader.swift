@@ -17,6 +17,7 @@ struct CalendarMonthHeader: View {
                 onPreviousMonth()
             } label: {
                 Image(systemName: "chevron.left")
+                    .foregroundStyle(Color.teal)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Previous month")
@@ -24,7 +25,8 @@ struct CalendarMonthHeader: View {
             Spacer()
 
             Text(title)
-                .font(.headline)
+                .font(.cardTitle)
+                .foregroundStyle(Color.ivory)
 
             Spacer()
 
@@ -32,6 +34,7 @@ struct CalendarMonthHeader: View {
                 onNextMonth()
             } label: {
                 Image(systemName: "chevron.right")
+                    .foregroundStyle(Color.teal)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Next month")

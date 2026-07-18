@@ -12,16 +12,28 @@ struct FriendFittingCard: View {
     let fitting: Fitting
     let isBookmarked: Bool
     let onToggleBookmark: () -> Void
+    let onSelectEvent: () -> Void
 
-    private var subtitleParts: [String] {
-        [
-            fitting.event.name,
-            fitting.event.venue?.name,
-            fitting.date.formatted(date: .abbreviated, time: .omitted)
-        ].compactMap { value in
-            guard let value, !value.isEmpty else { return nil }
-            return value
+    private var relativeDateText: String {
+        let calendar = Calendar.current
+
+        if calendar.isDateInToday(fitting.date) {
+            return "today"
         }
+
+        if calendar.isDateInYesterday(fitting.date) {
+            return "1 day ago"
+        }
+
+        let startOfToday = calendar.startOfDay(for: .now)
+        let startOfDate = calendar.startOfDay(for: fitting.date)
+        let dayCount = calendar.dateComponents([.day], from: startOfDate, to: startOfToday).day ?? 0
+
+        if dayCount > 1 {
+            return "\(dayCount) days ago"
+        }
+
+        return fitting.date.formatted(date: .abbreviated, time: .omitted)
     }
 
     private var initials: String {
@@ -33,70 +45,114 @@ struct FriendFittingCard: View {
             .joined()
     }
 
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            imagePlaceholder
+    private var venueName: String {
+        fitting.event.venue?.name ?? "the social"
+    }
 
+    private var verdictPhrase: String {
+        switch fitting.verdict {
+        case .rack:
+            return "off the rack"
+        case .altered:
+            return "altered"
+        case .toMeasure:
+            return "to measure"
+        case .bespoke:
+            return "bespoke"
+        }
+    }
+
+    private var postHeadline: String {
+        "\(fitting.loggedByName) danced at \(venueName) and it was \(verdictPhrase)"
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 0) {
             HStack(alignment: .top, spacing: 12) {
                 avatar
 
                 VStack(alignment: .leading, spacing: 4) {
-                    Text(fitting.loggedByName)
-                        .font(.headline)
+                    Text(postHeadline)
+                        .font(.cardTitle)
+                        .foregroundStyle(Color.ink)
+                        .fixedSize(horizontal: false, vertical: true)
 
-                    Text(subtitleParts.joined(separator: " · "))
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                    Text(relativeDateText)
+                        .font(.cardMeta)
+                        .foregroundStyle(Color.ink.opacity(0.62))
                 }
 
                 Spacer(minLength: 12)
+                
+                BookmarkButton(
+                    isBookmarked: isBookmarked,
+                    accessibilityName: "fitting",
+                    onToggle: onToggleBookmark
+                )
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 22)
+            .padding(.bottom, 16)
 
-                VStack(alignment: .trailing, spacing: 8) {
-                    BookmarkButton(
-                        isBookmarked: isBookmarked,
-                        accessibilityName: "fitting",
-                        onToggle: onToggleBookmark
-                    )
+            imagePlaceholder
 
-                    Text(fitting.verdict.rawValue.lowercased())
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 14) {
+                Button(action: onSelectEvent) {
+                    Text(fitting.event.name)
+                        .font(.cardTitle)
+                        .foregroundStyle(Color.ink)
+                        .multilineTextAlignment(.leading)
                 }
-            }
+                .buttonStyle(.plain)
 
-            if !fitting.note.isEmpty {
-                Text("\"\(fitting.note)\"")
-                    .font(.body)
-            }
+                tagFlow
 
-            tagFlow
+                if !fitting.note.isEmpty {
+                    Text(fitting.note)
+                        .font(.italicNote)
+                        .foregroundStyle(Color.ink)
+                }
+
+                Text(venueName)
+                    .font(.cardMeta)
+                    .foregroundStyle(Color.ink.opacity(0.62))
+            }
+            .padding(.horizontal, 24)
+            .padding(.top, 18)
+            .padding(.bottom, 24)
         }
-        .padding(.vertical, 8)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.cardCream)
+        .overlay(alignment: .top) {
+            ReceiptDashedLine(color: Color.ink.opacity(0.22))
+                .padding(.horizontal, 24)
+        }
     }
 
     private var avatar: some View {
         Text(initials.isEmpty ? "?" : initials)
             .font(.subheadline.weight(.bold))
-            .foregroundStyle(.white)
+            .foregroundStyle(Color.ivory)
             .frame(width: 40, height: 40)
-            .background(Color.accentColor, in: Circle())
+            .background(Color.teal, in: Circle())
     }
 
     private var imagePlaceholder: some View {
         ZStack {
             RoundedRectangle(cornerRadius: 8)
-                .fill(Color.secondary.opacity(0.12))
+                .fill(Color.teal.opacity(0.14))
 
             VStack(spacing: 8) {
                 Image(systemName: "photo")
                     .font(.title2)
 
                 Text("Photo from the night")
-                    .font(.caption.weight(.semibold))
+                    .font(.eyebrow)
             }
-            .foregroundStyle(.secondary)
+            .foregroundStyle(Color.teal)
         }
-        .frame(height: 150)
+        .frame(maxWidth: .infinity)
+        .frame(height: 210)
     }
 
     @ViewBuilder

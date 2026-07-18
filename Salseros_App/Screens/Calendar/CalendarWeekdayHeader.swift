@@ -14,8 +14,8 @@ struct CalendarWeekdayHeader: View {
         LazyVGrid(columns: columns, spacing: 6) {
             ForEach(weekdaySymbols, id: \.self) { symbol in
                 Text(symbol.prefix(1))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(.secondary)
+                    .font(.eyebrow)
+                    .foregroundStyle(Color.mutedIvory)
                     .frame(maxWidth: .infinity)
             }
         }
