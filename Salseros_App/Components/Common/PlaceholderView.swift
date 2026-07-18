@@ -4,6 +4,7 @@
 //
 //  Created by Noelia Herne on 7/6/26.
 //
+// Simple placeholder screen for unfinished tabs.
 import SwiftUI
  
 struct PlaceholderView: View {

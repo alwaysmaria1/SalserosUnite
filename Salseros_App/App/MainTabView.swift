@@ -4,35 +4,40 @@
 //
 //  Created by Noelia Herne on 7/6/26.
 //
-//
-//  MainTabView.swift
-//  SalsaLog
-//
-//  3 real tabs (Home, Plan, You) plus a floating circular Log button
-//  on top, matching the raised center-button design. Log was never a
-//  browsable screen — it opens the new-fitting form as a sheet.
-//
-//  The empty middle tab item below is a spacer: it reserves visual
-//  space in the tab bar so Home/Plan/[gap]/You divide evenly into 4
-//  slots, and the floating button sits centered over that gap.
-//
+// Main tab navigation for the app.
 
 import SwiftUI
 
 struct MainTabView: View {
+    @State private var selectedTab: AppTab = .home
+
     var body: some View {
-        TabView {
+        TabView(selection: $selectedTab) {
             HomeView()
                 .tabItem { Label("Home", systemImage: "house") }
- 
+                .tag(AppTab.home)
+
+            SearchView()
+                .tabItem { Label("Search", systemImage: "magnifyingglass") }
+                .tag(AppTab.search)
+
             PlanView()
                 .tabItem { Label("Plan", systemImage: "calendar") }
- 
-            LogView()
-                .tabItem { Label("Log", systemImage: "plus.circle.fill") }
- 
+                .tag(AppTab.plan)
+
+//            LogView()
+//                .tabItem { Label("Log", systemImage: "plus.circle.fill") }
+
             ProfileView()
                 .tabItem { Label("You", systemImage: "person") }
+                .tag(AppTab.profile)
         }
     }
+}
+
+private enum AppTab {
+    case search
+    case plan
+    case home
+    case profile
 }

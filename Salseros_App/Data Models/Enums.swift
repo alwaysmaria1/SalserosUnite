@@ -4,14 +4,9 @@
 //
 //  Created by Noelia Herne on 7/6/26.
 //
-//  Shared enums used across Venue, VenueReview, and (later) Fitting.
+//  Shared enums used across Event and Fitting.
 //
-//  Created by Noelia Herne on 7/1/26.
-//
-
-//Defining the shape of the data within the app
-//The app: Beli for Salsa Socials, helping salsa communities flourish
-//typically you have to rely on knowing ppl and word of mouth
+// Shared enum types used by events and fittings.
 
 import Foundation
 
@@ -28,17 +23,42 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
     case beginner = "Beginner"
     case intermediate = "Intermediate"
     case advanced = "Advanced"
+    case allWelcome = "All Welcome"
+
+    var id: String { rawValue }
+
+    var shortTitle: String {
+        switch self {
+        case .beginner:
+            "Beg"
+        case .intermediate:
+            "Int"
+        case .advanced:
+            "Adv"
+        case .allWelcome:
+            "All"
+        }
+    }
+
+    static let coreLevels: Set<Difficulty> = [.beginner, .intermediate, .advanced]
+}
+
+enum Vibe: String, Codable, CaseIterable, Identifiable { //should be multiselect
+    case formal = "Dressed up"
+    case casual = "Casual"
+    case clubbing = "Clubbing"
+    case summer = "Summer"
+    case outdoors = "Outdoors" //or perhaps "summery"
+    case indoors = "Indoors"
+    //case competition = "Competition" might be out of scope for now
 
     var id: String { rawValue }
 }
 
-enum Energy: String, Codable, CaseIterable, Identifiable {
-    case formal = "Formal"
-    case clubbing = "Clubbing"
-    case casual = "Casual"
-    case competition = "Competition"
-
-    var id: String { rawValue }
+extension Set where Element: RawRepresentable, Element.RawValue == String {
+    var sortedRawValues: [String] {
+        map(\.rawValue).sorted()
+    }
 }
 
 enum LeadFollowRatio: String, Codable, CaseIterable, Identifiable {
@@ -49,6 +69,7 @@ enum LeadFollowRatio: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+//This is the ranking system
 enum Verdict: String, Codable, CaseIterable, Identifiable {
     case rack = "Rack"
     case altered = "Altered"

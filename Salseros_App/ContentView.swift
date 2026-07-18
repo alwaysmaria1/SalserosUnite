@@ -4,6 +4,7 @@
 //
 //  Created by Noelia Herne on 7/1/26.
 //
+// Original starter content view kept for reference.
 
 import SwiftUI
 import SwiftData

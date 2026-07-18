@@ -8,22 +8,25 @@
 //  UserProfile.swift
 //  SalsaLog
 //
-//  Only one UserProfile exists today — this is your local profile.
+//  Only one UserProfile exists today - this is your local profile.
 //  Because it's already its own entity rather than baked into settings,
 //  real multi-profile switching later just means: allow multiple
-//  UserProfile rows + track which one is "active" — not a redesign.
+//  UserProfile rows + track which one is "active" - not a redesign.
 //
-//  friendNames is a plain list of strings for now — no separate Friend
+//  friendNames is a plain list of strings for now - no separate Friend
 //  table, since a name is all a seeded friend needs. This can become a
 //  list of real linked User references later without changing anything
 //  that reads it today.
 //
+// SwiftData model for the local user's profile.
 
 import Foundation
 import SwiftData
 
 @Model
 final class UserProfile {
+    static let currentUserDisplayName = "You"
+
     var name: String
     var preferredStyles: Set<DanceStyle>
     var joinDate: Date

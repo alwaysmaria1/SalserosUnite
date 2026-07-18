@@ -4,32 +4,45 @@
 //
 //  Created by Noelia Herne on 7/6/26.
 //
+// SwiftData model for a user's review-like fitting of an event.
 
 import Foundation
 import SwiftData
- 
+
+
+//This is essentially a review for an event by a user
+
 @Model
 final class Fitting {
     var date: Date
     var event: Event
     var verdict: Verdict
-    var vibeSwatch: String?     // optional one-tap "was this casual or competitive"-style note
+    var vibeTags: Set<Vibe>
+    var danceStylesTonight: Set<DanceStyle>
+    var difficulties: Set<Difficulty>
+    var leadFollowRatio: LeadFollowRatio
     var note: String
-    var loggedBy: UserProfile?  // the real person who logged this fitting
+    var loggedByName: String
  
     init(
         date: Date = .now,
         event: Event,
         verdict: Verdict = .rack,
-        vibeSwatch: String? = nil,
+        vibeTags: Set<Vibe> = [],
+        danceStylesTonight: Set<DanceStyle> = [],
+        difficulties: Set<Difficulty> = [],
+        leadFollowRatio: LeadFollowRatio = .balanced,
         note: String = "",
-        loggedBy: UserProfile? = nil
+        loggedByName: String = "You"
     ) {
         self.date = date
         self.event = event
         self.verdict = verdict
-        self.vibeSwatch = vibeSwatch
+        self.vibeTags = vibeTags
+        self.danceStylesTonight = danceStylesTonight
+        self.difficulties = difficulties
+        self.leadFollowRatio = leadFollowRatio
         self.note = note
-        self.loggedBy = loggedBy
+        self.loggedByName = loggedByName
     }
 }

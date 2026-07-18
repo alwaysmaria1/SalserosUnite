@@ -4,6 +4,7 @@
 //
 //  Created by Noelia Herne on 7/1/26.
 //
+// Original starter SwiftData item model kept for reference.
 
 import Foundation
 import SwiftData

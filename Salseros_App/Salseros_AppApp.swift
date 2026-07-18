@@ -4,6 +4,7 @@
 //
 //  Created by Noelia Herne on 7/1/26.
 //
+// Original starter app file kept commented out for reference.
 
 //import SwiftUI
 //import SwiftData
