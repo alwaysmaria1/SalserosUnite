@@ -27,6 +27,35 @@ struct HomeView: View {
         events.first { !$0.friendsGoing.isEmpty } ?? events.first
     }
 
+    private var currentDateLabel: String {
+        let day = Calendar.current.component(.day, from: .now)
+        let suffix: String
+
+        switch day {
+        case 11, 12, 13:
+            suffix = "th"
+        default:
+            switch day % 10 {
+            case 1:
+                suffix = "st"
+            case 2:
+                suffix = "nd"
+            case 3:
+                suffix = "rd"
+            default:
+                suffix = "th"
+            }
+        }
+
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEEE MMMM"
+        return "\(formatter.string(from: .now)) \(day)\(suffix)"
+    }
+
+    private func promoDateText(for event: Event) -> String {
+        event.nextDate.formatted(.dateTime.weekday(.abbreviated).month(.abbreviated).day())
+    }
+
     init(
         onLogNight: @escaping () -> Void = {},
         onPlan: @escaping () -> Void = {}
@@ -38,13 +67,8 @@ struct HomeView: View {
     var body: some View {
         NavigationStack {
             ScrollView {
-                LazyVStack(alignment: .leading, spacing: 28) {
+                LazyVStack(alignment: .leading, spacing: 42) {
                     homeHeader
-
-                    Text("WHERE FRIENDS HAVE BEEN DANCING")
-                        .font(.eyebrow)
-                        .foregroundStyle(Color.ivory)
-                        .padding(.horizontal, 24)
 
                     friendFeedContent
                 }
@@ -69,14 +93,20 @@ struct HomeView: View {
 
     @ViewBuilder
     private var homeHeader: some View {
-        VStack(alignment: .leading, spacing: 22) {
-            Text("Clave")
-                .font(.title2.weight(.bold))
+        VStack(alignment: .leading, spacing: 14) {
+            Text("Clavé")
+                .font(.title.weight(.bold))
                 .foregroundStyle(Color.ivory)
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
 
             if let featuredEvent {
+                Text(currentDateLabel)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.ivory.opacity(0.7))
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 24)
+
                 friendsGoingCard(featuredEvent)
                     .padding(.horizontal, 24)
 
@@ -95,81 +125,78 @@ struct HomeView: View {
     }
 
     private func friendsGoingCard(_ event: Event) -> some View {
-        HStack(alignment: .center, spacing: 10) {
-            VStack(alignment: .leading, spacing: 14) {
-                Text("FRIENDS ARE GOING")
-                    .font(.eyebrow)
-                    .foregroundStyle(Color.ink.opacity(0.62))
+        VStack(alignment: .leading, spacing: 10) {
+            Text("NEXT UPCOMING SOCIAL")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(Color.ink.opacity(0.72))
+                .lineLimit(1)
 
-                HStack(spacing: 10) {
-                    avatarStack(for: event.friendsGoing)
+            friendsGoingInfo(event)
 
-                    Button {
-                        selectedEventForDetails = event
-                    } label: {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text(event.name)
-                                .font(.headline.weight(.bold))
-                                .foregroundStyle(Color.ink)
-                                .lineLimit(1)
-                                .truncationMode(.tail)
-                                .multilineTextAlignment(.leading)
+            HStack(alignment: .bottom) {
+                Text(promoDateText(for: event).uppercased())
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(Color.ink.opacity(0.56))
+                    .lineLimit(1)
 
-                            Text(featuredEventSubtitle(for: event))
-                                .font(.caption.weight(.semibold))
-                                .foregroundStyle(Color.ink.opacity(0.62))
-                                .lineLimit(1)
-                        }
-                    }
-                    .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+                Spacer(minLength: 10)
+
+                RSVPButton(isRSVPed: event.isRSVPed) {
+                    event.isRSVPed.toggle()
                 }
+                .fixedSize(horizontal: true, vertical: false)
+                .scaleEffect(0.78, anchor: .bottomTrailing)
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-
-            RSVPButton(isRSVPed: event.isRSVPed) {
-                event.isRSVPed.toggle()
-            }
-            .fixedSize(horizontal: true, vertical: false)
-            .scaleEffect(0.86)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 16)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
     }
 
+    private func friendsGoingInfo(_ event: Event) -> some View {
+        HStack(spacing: 8) {
+            AvatarStack(names: event.friendsGoing, size: 32)
+
+            Button {
+                selectedEventForDetails = event
+            } label: {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(event.name)
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color.ink)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                        .multilineTextAlignment(.leading)
+
+                    Text(featuredEventSubtitle(for: event))
+                        .font(.caption2.weight(.semibold))
+                        .foregroundStyle(Color.ink.opacity(0.62))
+                        .lineLimit(1)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .buttonStyle(.plain)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
     private func homeActionTile(title: String, systemImage: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
-            VStack(spacing: 14) {
+            VStack(spacing: 10) {
                 Image(systemName: systemImage)
-                    .font(.title2)
+                    .font(.title3)
 
                 Text(title)
-                    .font(.eyebrow)
+                    .font(.caption.weight(.bold))
+                    .tracking(2)
             }
             .foregroundStyle(Color.ink)
             .frame(maxWidth: .infinity)
-            .frame(height: 124)
+            .frame(height: 96)
             .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
-    }
-
-    private func avatarStack(for names: [String]) -> some View {
-        HStack(spacing: -8) {
-            ForEach(Array(names.prefix(3).enumerated()), id: \.offset) { index, name in
-                Text(initials(for: name))
-                    .font(.eyebrow)
-                    .foregroundStyle(Color.ivory)
-                    .frame(width: 32, height: 32)
-                    .background(avatarColor(at: index), in: Circle())
-                    .overlay {
-                        Circle()
-                            .stroke(Color.cardCream, lineWidth: 2)
-                    }
-            }
-        }
     }
 
     private func featuredEventSubtitle(for event: Event) -> String {
@@ -181,28 +208,6 @@ struct HomeView: View {
             return value
         }
         .joined(separator: " · ")
-    }
-
-    private func initials(for name: String) -> String {
-        let initials = name
-            .split(separator: " ")
-            .compactMap(\.first)
-            .prefix(2)
-            .map(String.init)
-            .joined()
-
-        return initials.isEmpty ? "?" : initials
-    }
-
-    private func avatarColor(at index: Int) -> Color {
-        switch index {
-        case 0:
-            return Color.teal
-        case 1:
-            return Color.rust
-        default:
-            return Color.ink
-        }
     }
 
     @ViewBuilder
@@ -232,6 +237,10 @@ struct HomeView: View {
                             .frame(height: 1)
                     }
                 }
+            }
+            .overlay(alignment: .top) {
+                MeasuringTapeDivider()
+                    .offset(y: -16)
             }
         }
     }

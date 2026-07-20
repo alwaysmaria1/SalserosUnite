@@ -17,15 +17,7 @@ struct CompactEventCard: View {
     let onEditFitting: (Fitting) -> Void
 
     private var subtitle: String {
-        [
-            event.venue?.name,
-            event.venue?.city,
-            event.nextDate.formatted(date: .abbreviated, time: .shortened)
-        ].compactMap { value in
-            guard let value, !value.isEmpty else { return nil }
-            return value
-        }
-        .joined(separator: " · ")
+        event.venue?.name ?? ""
     }
 
     var body: some View {

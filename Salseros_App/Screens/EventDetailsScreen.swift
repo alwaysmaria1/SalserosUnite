@@ -20,9 +20,8 @@ struct EventDetailsScreen: View {
         event.fittings.sorted { $0.date > $1.date }
     }
 
-    private var dateEyebrow: String {
-        let timeText = event.eventMeasurements.hours.isEmpty ? event.nextDate.formatted(date: .omitted, time: .shortened) : event.eventMeasurements.hours
-        return "TONIGHT · \(timeText)"
+    private var timeText: String {
+        event.eventMeasurements.hours.isEmpty ? event.nextDate.formatted(date: .omitted, time: .shortened) : event.eventMeasurements.hours
     }
 
     private var venueLine: String {
@@ -45,25 +44,50 @@ struct EventDetailsScreen: View {
             pieces.append("+ \(remainder) going")
         }
 
-        return pieces.isEmpty ? "\(event.goingCount) going" : pieces.joined(separator: ", ")
+        return pieces.isEmpty ? "+ \(event.goingCount) going" : pieces.joined(separator: ", ")
     }
 
-    private var vibeSentence: String {
-        let difficulty = event.allDifficulties.sortedRawValues.first ?? "Open"
-        let vibe = event.topVibes.first?.rawValue ?? "social"
-        let ratio = event.averageLeadFollowRatio?.rawValue ?? "balanced"
-        return "\(difficulty) crowd. \(vibe) energy. \(ratio) lead:follow."
+    private var nextEventLabel: String {
+        Calendar.current.isDateInToday(event.nextDate)
+            ? "TONIGHT"
+            : event.nextDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()).uppercased()
+    }
+
+    private var attendeeAvatarNames: [String] {
+        if !event.friendsGoing.isEmpty {
+            return event.friendsGoing
+        }
+
+        return (1...max(1, min(event.goingCount, 3))).map { "Guest \($0)" }
+    }
+
+    private var detailTags: [EventDisplayTag] {
+        let difficultyTags = event.allDifficulties
+            .sorted { $0.rawValue < $1.rawValue }
+            .map { EventDisplayTag(title: $0.rawValue, style: .difficulty) }
+
+        let vibeTags = event.topVibes
+            .map { EventDisplayTag(title: $0.displayTitle, style: .standard) }
+
+        let danceTags = event.allDanceStyles
+            .sortedRawValues
+            .map { EventDisplayTag(title: $0, style: .standard) }
+
+        let ratioTags = event.averageLeadFollowRatio
+            .map { [EventDisplayTag(title: $0.rawValue, style: .standard)] } ?? []
+
+        return Array((difficultyTags + vibeTags + danceTags + ratioTags).prefix(8))
     }
 
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView {
-                VStack(alignment: .leading, spacing: 28) {
+                VStack(alignment: .leading, spacing: 18) {
                     hero
+                    eventGradientDivider
                     eventHeader
-                    goingCard
+                    nextEventSection
                     measurementsSection
-                    vibeSection
                     wordOfMouthSection
                 }
                 .padding(.horizontal, 24)
@@ -94,7 +118,10 @@ struct EventDetailsScreen: View {
             HStack {
                 circleIconButton("chevron.left", action: { dismiss() })
                 Spacer()
-                circleIconButton(event.isFavorite ? "bookmark.fill" : "bookmark") {
+                circleIconButton(
+                    event.isFavorite ? "bookmark.fill" : "bookmark",
+                    isSelected: event.isFavorite
+                ) {
                     event.isFavorite.toggle()
                 }
             }
@@ -106,47 +133,72 @@ struct EventDetailsScreen: View {
         .padding(.horizontal, -24)
     }
 
-    private var eventHeader: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Text(dateEyebrow)
-                .font(.eyebrow)
-                .foregroundStyle(Color.rust)
+    private var eventGradientDivider: some View {
+        LinearGradient(
+            colors: [Color.teal, Color.rust, Color(red: 0.96, green: 0.78, blue: 0.22)],
+            startPoint: .leading,
+            endPoint: .trailing
+        )
+        .frame(height: 4)
+        .padding(.horizontal, -24)
+        .padding(.top, -18)
+        .padding(.bottom, -12)
+    }
 
+    private var eventHeader: some View {
+        VStack(alignment: .leading, spacing: 9) {
             Text(event.name)
-                .font(.displaySerif)
+                .font(.title.weight(.bold))
                 .foregroundStyle(Color.ivory)
                 .lineLimit(2)
-                .minimumScaleFactor(0.74)
-
-            if event.isFavorite {
-                Text("standing order")
-                    .font(.italicNote)
-                    .foregroundStyle(Color.rust)
-            }
+                .minimumScaleFactor(0.82)
 
             if !venueLine.isEmpty {
                 Text(venueLine)
-                    .font(.cardMeta)
+                    .font(.subheadline.weight(.semibold))
                     .foregroundStyle(Color.ivory.opacity(0.82))
             }
         }
     }
 
+    private var nextEventSection: some View {
+        goingCard
+    }
+
     private var goingCard: some View {
-        HStack(spacing: 14) {
-            avatarStack(for: event.friendsGoing)
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text(nextEventLabel)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.ink.opacity(0.82))
 
-            Text(goingText)
-                .font(.cardMeta)
-                .foregroundStyle(Color.ink.opacity(0.72))
-                .lineLimit(1)
+                Spacer()
 
-            Spacer(minLength: 8)
-
-            RSVPButton(isRSVPed: event.isRSVPed) {
-                event.isRSVPed.toggle()
+                Text(timeText)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.ink.opacity(0.62))
+                    .lineLimit(1)
             }
-            .scaleEffect(0.9)
+
+            HStack(spacing: 12) {
+                AvatarStack(
+                    names: attendeeAvatarNames,
+                    size: 34,
+                    palette: [Color.ink, Color.rust, Color.espresso.opacity(0.75)]
+                )
+
+                Text(goingText)
+                    .font(.subheadline.weight(.bold))
+                    .foregroundStyle(Color.ink)
+                    .lineLimit(1)
+
+                Spacer(minLength: 8)
+
+                RSVPButton(isRSVPed: event.isRSVPed) {
+                    event.isRSVPed.toggle()
+                }
+                .scaleEffect(0.86)
+            }
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 16)
@@ -156,10 +208,16 @@ struct EventDetailsScreen: View {
     private var measurementsSection: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("MEASUREMENTS")
-                .font(.eyebrow)
+                .font(.caption.weight(.bold))
                 .foregroundStyle(Color.ivory)
 
             VStack(spacing: 0) {
+                detailTagGrid
+                    .padding(.horizontal, 18)
+                    .padding(.top, 16)
+                    .padding(.bottom, 12)
+
+                receiptDivider
                 measurementRow("Hours", event.eventMeasurements.hours)
                 receiptDivider
                 measurementRow("Cover", event.eventMeasurements.coverCharge)
@@ -172,28 +230,42 @@ struct EventDetailsScreen: View {
         }
     }
 
-    private var vibeSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("THE VIBE")
-                .font(.eyebrow)
-                .foregroundStyle(Color.ivory)
-
-            Text(vibeSentence)
-                .font(.title.weight(.bold))
-                .foregroundStyle(Color.ivory)
-                .fixedSize(horizontal: false, vertical: true)
+    @ViewBuilder
+    private var detailTagGrid: some View {
+        if detailTags.isEmpty {
+            Text("No vibe tags yet")
+                .font(.cardMeta)
+                .foregroundStyle(Color.ink.opacity(0.62))
+                .frame(maxWidth: .infinity, alignment: .leading)
+        } else {
+            FlowChipLayout {
+                ForEach(detailTags) { tag in
+                    EventTagChip(
+                        tag: tag,
+                        font: .caption.weight(.bold),
+                        horizontalPadding: 12,
+                        verticalPadding: 7
+                    )
+                }
+            }
         }
     }
 
     @ViewBuilder
     private var wordOfMouthSection: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("WORD OF MOUTH")
-                .font(.eyebrow)
+                Text("WORD OF MOUTH")
+                .font(.caption.weight(.bold))
                 .foregroundStyle(Color.ivory)
 
             if let fitting = sortedFittings.first {
-                reviewCard(fitting)
+                FriendFittingCard(
+                    fitting: fitting,
+                    isBookmarked: false,
+                    onToggleBookmark: {},
+                    onSelectEvent: {}
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 8))
             } else {
                 Text("Add the first fitting for this event.")
                     .font(.cardMeta)
@@ -206,7 +278,7 @@ struct EventDetailsScreen: View {
     }
 
     private var bottomBar: some View {
-        HStack(spacing: 18) {
+        HStack(spacing: 12) {
             Button {
                 // Directions are visual-only until map routing is added.
             } label: {
@@ -214,7 +286,7 @@ struct EventDetailsScreen: View {
                     .font(.eyebrow)
                     .foregroundStyle(Color.ink)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 19)
+                    .padding(.vertical, 13)
                     .background(Color.cardCream, in: Capsule())
             }
             .buttonStyle(.plain)
@@ -227,17 +299,17 @@ struct EventDetailsScreen: View {
                 }
             } label: {
                 Image(systemName: userFitting == nil ? "plus" : "pencil")
-                    .font(.title2.weight(.bold))
+                    .font(.title3.weight(.bold))
                     .foregroundStyle(Color.ivory)
-                    .frame(width: 72, height: 72)
+                    .frame(width: 54, height: 54)
                     .background(Color.teal, in: Circle())
             }
             .buttonStyle(.plain)
             .accessibilityLabel(userFitting == nil ? "Add fitting" : "Edit fitting")
         }
         .padding(.horizontal, 24)
-        .padding(.top, 16)
-        .padding(.bottom, 24)
+        .padding(.top, 10)
+        .padding(.bottom, 16)
         .background(Color.espresso.opacity(0.92))
     }
 
@@ -248,15 +320,15 @@ struct EventDetailsScreen: View {
 
     private func measurementRow(_ title: String, _ value: String) -> some View {
         HStack(alignment: .firstTextBaseline) {
-            Text(title)
-                .font(.cardTitle)
+                Text(title)
+                .font(.headline.weight(.bold))
                 .foregroundStyle(Color.ink)
 
             Spacer(minLength: 12)
 
             Text(value.isEmpty ? "Not listed" : value)
-                .font(.cardMeta)
-                .foregroundStyle(title == "Cover" ? Color.rust : Color.ink.opacity(0.64))
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.ink)
                 .multilineTextAlignment(.trailing)
         }
         .padding(.horizontal, 18)
@@ -267,11 +339,11 @@ struct EventDetailsScreen: View {
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
                 Text(fitting.loggedByName)
-                    .font(.cardTitle)
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(Color.ink)
 
                 Text("\(fittingCount(for: fitting.loggedByName)) NIGHTS")
-                    .font(.eyebrow)
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(Color.ink.opacity(0.56))
 
                 Spacer()
@@ -283,7 +355,7 @@ struct EventDetailsScreen: View {
 
             if !fitting.note.isEmpty {
                 Text(fitting.note)
-                    .font(.italicNote)
+                    .font(.callout)
                     .foregroundStyle(Color.ink.opacity(0.82))
             }
         }
@@ -296,54 +368,21 @@ struct EventDetailsScreen: View {
         event.fittings.filter { $0.loggedByName == name }.count
     }
 
-    private func avatarStack(for names: [String]) -> some View {
-        HStack(spacing: -8) {
-            ForEach(Array(names.prefix(3).enumerated()), id: \.offset) { index, name in
-                Text(initials(for: name))
-                    .font(.eyebrow)
-                    .foregroundStyle(Color.ivory)
-                    .frame(width: 34, height: 34)
-                    .background(avatarColor(at: index), in: Circle())
-                    .overlay {
-                        Circle()
-                            .stroke(Color.cardCream, lineWidth: 2)
-                    }
-            }
-        }
-    }
-
-    private func circleIconButton(_ systemImage: String, action: @escaping () -> Void) -> some View {
+    private func circleIconButton(
+        _ systemImage: String,
+        isSelected: Bool = false,
+        action: @escaping () -> Void
+    ) -> some View {
         Button(action: action) {
             Image(systemName: systemImage)
                 .font(.title3.weight(.semibold))
-                .foregroundStyle(Color.ivory)
+                .foregroundStyle(isSelected ? Color.rust : Color.ivory)
                 .frame(width: 56, height: 56)
                 .background(Color.ink.opacity(0.38), in: Circle())
         }
         .buttonStyle(.plain)
     }
 
-    private func initials(for name: String) -> String {
-        let initials = name
-            .split(separator: " ")
-            .compactMap(\.first)
-            .prefix(2)
-            .map(String.init)
-            .joined()
-
-        return initials.isEmpty ? "?" : initials
-    }
-
-    private func avatarColor(at index: Int) -> Color {
-        switch index {
-        case 0:
-            return Color.ink
-        case 1:
-            return Color.rust
-        default:
-            return Color.espresso.opacity(0.75)
-        }
-    }
 }
 
 private struct DiagonalStripePattern: Shape {

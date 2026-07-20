@@ -45,14 +45,36 @@ enum Difficulty: String, Codable, CaseIterable, Identifiable {
 
 enum Vibe: String, Codable, CaseIterable, Identifiable { //should be multiselect
     case formal = "Dressed up"
-    case casual = "Casual"
     case clubbing = "Clubbing"
-    case summer = "Summer"
     case outdoors = "Outdoors" //or perhaps "summery"
     case indoors = "Indoors"
+    case casual = "Casual"
+    case summer = "Summer"
     //case competition = "Competition" might be out of scope for now
 
     var id: String { rawValue }
+
+    var displayTitle: String {
+        switch self {
+        case .formal:
+            "Dress code"
+        default:
+            rawValue
+        }
+    }
+
+    var isVisibleTag: Bool {
+        switch self {
+        case .casual, .summer:
+            false
+        default:
+            true
+        }
+    }
+
+    static var filterCases: [Vibe] {
+        allCases.filter(\.isVisibleTag)
+    }
 }
 
 extension Set where Element: RawRepresentable, Element.RawValue == String {

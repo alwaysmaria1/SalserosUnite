@@ -35,7 +35,7 @@ struct MainTabView: View {
                 .tabItem { Label("You", systemImage: "person") }
                 .tag(AppTab.profile)
         }
-        .tint(Color.teal)
+        .tint(Color.ivory)
     }
 }
 

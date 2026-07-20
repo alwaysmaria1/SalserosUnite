@@ -24,6 +24,7 @@ struct FittingDetailsView: View {
 
     @State private var selectedDateChip: DateChip = .tonight
     @State private var didRate = false
+    @State private var expandedDetailSection: FittingDetailSection?
 
     private var eventTitle: String {
         event.venue?.name ?? event.name
@@ -31,19 +32,6 @@ struct FittingDetailsView: View {
 
     private var eventSubtitle: String {
         event.venue == nil ? "" : event.name
-    }
-
-    private var ratingValue: Int {
-        switch verdict {
-        case .rack:
-            return 1
-        case .altered:
-            return 2
-        case .toMeasure:
-            return 3
-        case .bespoke:
-            return 4
-        }
     }
 
     private var ratingExplanation: String {
@@ -62,10 +50,13 @@ struct FittingDetailsView: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             VStack(spacing: 0) {
+                dragHandle
+                    .padding(.top, 10)
+                    .padding(.bottom, 8)
+
                 floatingEventName
 
                 VStack(alignment: .leading, spacing: 18) {
-                    dragHandle
                     header
                     ratingPanel
 
@@ -78,9 +69,9 @@ struct FittingDetailsView: View {
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 18)
-                .padding(.bottom, 118)
+                .padding(.bottom, 96)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                .background(Color.espresso)
+                .background(Color.cardCream)
                 .clipShape(UnevenRoundedRectangle(topLeadingRadius: 28, topTrailingRadius: 28))
             }
 
@@ -111,15 +102,19 @@ struct FittingDetailsView: View {
         .padding(.vertical, 14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.cardCream.opacity(0.95), lineWidth: 1)
+        }
+        .shadow(color: Color.ink.opacity(0.12), radius: 12, y: 6)
         .padding(.horizontal, 24)
-        .padding(.top, 16)
-        .padding(.bottom, -16)
+        .padding(.bottom, 12)
         .zIndex(1)
     }
 
     private var dragHandle: some View {
         Capsule()
-            .fill(Color.ivory.opacity(0.72))
+            .fill(Color.ink.opacity(0.3))
             .frame(width: 64, height: 6)
             .frame(maxWidth: .infinity)
     }
@@ -128,14 +123,14 @@ struct FittingDetailsView: View {
         HStack {
             Text("LOG A FITTING")
                 .font(.eyebrow)
-                .foregroundStyle(Color.ivory)
+                .foregroundStyle(Color.ink)
 
             Spacer()
 
             Button(action: onCancel) {
                 Image(systemName: "xmark")
                     .font(.title3.weight(.semibold))
-                    .foregroundStyle(Color.ivory)
+                    .foregroundStyle(Color.ink)
             }
             .buttonStyle(.plain)
             .accessibilityLabel("Cancel fitting")
@@ -146,38 +141,51 @@ struct FittingDetailsView: View {
         VStack(alignment: .leading, spacing: 14) {
             Text("HOW WAS THE NIGHT? *")
                 .font(.eyebrow)
-                .foregroundStyle(Color.ivory)
+                .foregroundStyle(Color.ink)
 
-            HStack(spacing: 14) {
-                ForEach(1...4, id: \.self) { value in
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 4), spacing: 8) {
+                ForEach(Verdict.allCases) { option in
                     Button {
-                        setRating(value)
+                        verdict = option
+                        didRate = true
                     } label: {
-                        Image(systemName: value <= ratingValue && didRate ? "star.fill" : "star")
-                            .font(.system(size: 34, weight: .semibold))
-                            .foregroundStyle(value <= ratingValue && didRate ? Color.rust : Color.ivory.opacity(0.62))
+                        Text(ratingTitle(for: option))
+                            .font(.caption2.weight(.bold))
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.62)
+                            .foregroundStyle(Color.ivory)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 8)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(verdict == option && didRate ? Color.rust : Color.teal, in: RoundedRectangle(cornerRadius: 7))
+                            .overlay {
+                                RoundedRectangle(cornerRadius: 7)
+                                    .stroke(verdict == option && didRate ? Color.rust : Color.teal.opacity(0.9), lineWidth: 1)
+                            }
                     }
                     .buttonStyle(.plain)
                 }
             }
-            .frame(maxWidth: .infinity)
 
             if didRate || mode == .edit {
                 Text(ratingExplanation)
                     .font(.italicNote)
-                    .foregroundStyle(Color.ivory.opacity(0.82))
+                    .foregroundStyle(Color.ink)
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(12)
                     .overlay {
                         RoundedRectangle(cornerRadius: 8)
-                            .stroke(Color.rust.opacity(0.8), style: StrokeStyle(lineWidth: 1.4, dash: [5, 4]))
+                            .stroke(Color.teal.opacity(0.5), style: StrokeStyle(lineWidth: 1.4, dash: [5, 4]))
                     }
             }
         }
         .padding(16)
+        .background(Color.teal.opacity(0.34), in: RoundedRectangle(cornerRadius: 8))
         .overlay {
             RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.ivory.opacity(0.35), lineWidth: 1)
+                .stroke(Color.teal.opacity(0.48), lineWidth: 1)
         }
     }
 
@@ -185,8 +193,8 @@ struct FittingDetailsView: View {
         VStack(alignment: .leading, spacing: 14) {
             ReceiptDashedLine(color: Color.ink.opacity(0.25))
 
-            compactRow(title: "Date") {
-                HStack(spacing: 8) {
+            expandableDetailRow(section: .date, title: "Date", summary: selectedDateChip.title) {
+                choiceGrid {
                     ForEach(DateChip.allCases) { chip in
                         smallChoice(chip.title, isSelected: selectedDateChip == chip) {
                             selectDateChip(chip)
@@ -195,8 +203,8 @@ struct FittingDetailsView: View {
                 }
             }
 
-            compactRow(title: "Difficulty") {
-                HStack(spacing: 8) {
+            expandableDetailRow(section: .difficulty, title: "Difficulty", summary: difficultySummary) {
+                choiceGrid {
                     ForEach(Difficulty.allCases) { difficulty in
                         smallChoice(difficulty.shortTitle, isSelected: difficulties.contains(difficulty)) {
                             toggleDifficulty(difficulty)
@@ -205,18 +213,18 @@ struct FittingDetailsView: View {
                 }
             }
 
-            compactRow(title: "Feel") {
-                HStack(spacing: 8) {
-                    ForEach(Vibe.allCases.prefix(4)) { vibe in
-                        smallChoice(vibe.rawValue, isSelected: vibeTags.contains(vibe)) {
+            expandableDetailRow(section: .feel, title: "Feel", summary: vibeSummary) {
+                choiceGrid {
+                    ForEach(Vibe.filterCases) { vibe in
+                        smallChoice(vibe.displayTitle, isSelected: vibeTags.contains(vibe)) {
                             toggleVibe(vibe)
                         }
                     }
                 }
             }
 
-            compactRow(title: "Style") {
-                HStack(spacing: 8) {
+            expandableDetailRow(section: .style, title: "Style", summary: danceStyleSummary) {
+                choiceGrid {
                     ForEach(DanceStyle.allCases) { style in
                         smallChoice(style.id.replacingOccurrences(of: "Salsa (", with: "").replacingOccurrences(of: ")", with: ""), isSelected: danceStylesTonight.contains(style)) {
                             toggleDanceStyle(style)
@@ -225,8 +233,8 @@ struct FittingDetailsView: View {
                 }
             }
 
-            compactRow(title: "Lead : Follow") {
-                HStack(spacing: 8) {
+            expandableDetailRow(section: .leadFollow, title: "Lead : Follow", summary: leadFollowRatio.rawValue) {
+                choiceGrid {
                     ForEach(LeadFollowRatio.allCases) { ratio in
                         smallChoice(ratio.rawValue, isSelected: leadFollowRatio == ratio) {
                             leadFollowRatio = ratio
@@ -235,29 +243,92 @@ struct FittingDetailsView: View {
                 }
             }
 
-            TextField("Add a note", text: $note, axis: .vertical)
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(Color.ink)
-                .lineLimit(2, reservesSpace: true)
-                .padding(10)
-                .overlay {
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.rust.opacity(0.35), style: StrokeStyle(lineWidth: 1.2, dash: [5, 4]))
-                }
+            VStack(alignment: .leading, spacing: 7) {
+                Text("Notes")
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(Color.ink)
+
+                TextField("Add a note", text: $note, axis: .vertical)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.ink)
+                    .lineLimit(2, reservesSpace: true)
+                    .padding(10)
+                    .background(Color.cardCream.opacity(0.72), in: RoundedRectangle(cornerRadius: 8))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: 8)
+                            .stroke(Color.ink.opacity(0.22), lineWidth: 1)
+                    }
+            }
         }
         .padding(16)
         .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
     }
 
-    private func compactRow<Content: View>(
+    private var difficultySummary: String {
+        selectedSummary(difficulties.map(\.shortTitle))
+    }
+
+    private var vibeSummary: String {
+        selectedSummary(vibeTags.filter(\.isVisibleTag).map(\.displayTitle))
+    }
+
+    private var danceStyleSummary: String {
+        selectedSummary(danceStylesTonight.map { $0.id.replacingOccurrences(of: "Salsa (", with: "").replacingOccurrences(of: ")", with: "") })
+    }
+
+    private func selectedSummary(_ values: [String]) -> String {
+        guard !values.isEmpty else { return "Tap to choose" }
+        let sortedValues = values.sorted()
+        let visibleValues = sortedValues.prefix(2).joined(separator: ", ")
+        let remainingCount = sortedValues.count - 2
+
+        return remainingCount > 0 ? "\(visibleValues) +\(remainingCount)" : visibleValues
+    }
+
+    private func expandableDetailRow<Content: View>(
+        section: FittingDetailSection,
         title: String,
+        summary: String,
         @ViewBuilder content: () -> Content
     ) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title.uppercased())
-                .font(.caption2.weight(.bold))
-                .foregroundStyle(Color.rust)
+            Button {
+                withAnimation(.snappy(duration: 0.18)) {
+                    expandedDetailSection = expandedDetailSection == section ? nil : section
+                }
+            } label: {
+                HStack(spacing: 10) {
+                    Text(title)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.ink)
 
+                    Spacer(minLength: 8)
+
+                    Text(summary)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(Color.teal)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+
+                    Image(systemName: "chevron.right")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.ink.opacity(0.42))
+                        .rotationEffect(.degrees(expandedDetailSection == section ? 90 : 0))
+                }
+                .contentShape(Rectangle())
+            }
+            .buttonStyle(.plain)
+
+            if expandedDetailSection == section {
+                content()
+                    .transition(.opacity.combined(with: .move(edge: .top)))
+            }
+        }
+        .padding(.vertical, 2)
+    }
+
+    private func choiceGrid<Content: View>(@ViewBuilder content: () -> Content) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 6), count: 3), spacing: 7) {
             content()
         }
     }
@@ -268,7 +339,7 @@ struct FittingDetailsView: View {
                 .font(.caption2.weight(.bold))
                 .lineLimit(1)
                 .minimumScaleFactor(0.65)
-                .foregroundStyle(isSelected ? Color.ivory : Color.ink.opacity(0.82))
+                .foregroundStyle(isSelected ? Color.ivory : Color.ink)
                 .padding(.horizontal, 8)
                 .padding(.vertical, 7)
                 .frame(maxWidth: .infinity)
@@ -282,46 +353,37 @@ struct FittingDetailsView: View {
     }
 
     private var saveBar: some View {
-        VStack(spacing: 14) {
+        VStack(spacing: 10) {
             Button(action: onSave) {
                 Text("SAVE FITTING")
                     .font(.eyebrow)
                     .foregroundStyle(Color.ivory)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 18)
-                    .background(Color.ink, in: Capsule())
+                    .background(Color.rust, in: Capsule())
             }
             .buttonStyle(.plain)
             .disabled(!(didRate || mode == .edit))
             .opacity(didRate || mode == .edit ? 1 : 0.45)
 
-            HStack(spacing: 12) {
-                ReceiptDashedLine(color: Color.ivory.opacity(0.5))
-                Text("SALSALOG · GOING TO THE TAILOR")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(Color.ivory.opacity(0.62))
-                    .lineLimit(1)
-                ReceiptDashedLine(color: Color.ivory.opacity(0.5))
-            }
+            ReceiptDashedLine(color: Color.ink.opacity(0.28))
         }
         .padding(.horizontal, 24)
-        .padding(.top, 18)
-        .padding(.bottom, 16)
-        .background(Color.espresso.opacity(0.94))
+        .padding(.top, 10)
+        .padding(.bottom, 14)
+        .background(Color.cardCream.opacity(0.96))
     }
 
-    private func setRating(_ value: Int) {
-        didRate = true
-
-        switch value {
-        case 1:
-            verdict = .rack
-        case 2:
-            verdict = .altered
-        case 3:
-            verdict = .toMeasure
-        default:
-            verdict = .bespoke
+    private func ratingTitle(for option: Verdict) -> String {
+        switch option {
+        case .rack:
+            "OFF THE RACK"
+        case .altered:
+            "ALTERED"
+        case .toMeasure:
+            "TO MEASURE"
+        case .bespoke:
+            "BESPOKE"
         }
     }
 
@@ -394,6 +456,14 @@ enum FittingMode {
             "Edit Fitting"
         }
     }
+}
+
+private enum FittingDetailSection: Hashable {
+    case date
+    case difficulty
+    case feel
+    case style
+    case leadFollow
 }
 
 private enum DateChip: String, CaseIterable, Identifiable {

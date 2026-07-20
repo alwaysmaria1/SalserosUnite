@@ -22,7 +22,7 @@ struct FriendFittingCard: View {
         }
 
         if calendar.isDateInYesterday(fitting.date) {
-            return "1 day ago"
+            return "a day ago"
         }
 
         let startOfToday = calendar.startOfDay(for: .now)
@@ -71,24 +71,12 @@ struct FriendFittingCard: View {
             HStack(alignment: .top, spacing: 12) {
                 avatar
 
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(postHeadline)
-                        .font(.cardTitle)
-                        .foregroundStyle(Color.ink)
-                        .fixedSize(horizontal: false, vertical: true)
+                Text(postHeadline)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(Color.ink)
+                    .fixedSize(horizontal: false, vertical: true)
 
-                    Text(relativeDateText)
-                        .font(.cardMeta)
-                        .foregroundStyle(Color.ink.opacity(0.62))
-                }
-
-                Spacer(minLength: 12)
-                
-                BookmarkButton(
-                    isBookmarked: isBookmarked,
-                    accessibilityName: "fitting",
-                    onToggle: onToggleBookmark
-                )
+                Spacer(minLength: 0)
             }
             .padding(.horizontal, 24)
             .padding(.top, 22)
@@ -97,13 +85,10 @@ struct FriendFittingCard: View {
             imagePlaceholder
 
             VStack(alignment: .leading, spacing: 14) {
-                Button(action: onSelectEvent) {
-                    Text(fitting.event.name)
-                        .font(.cardTitle)
-                        .foregroundStyle(Color.ink)
-                        .multilineTextAlignment(.leading)
-                }
-                .buttonStyle(.plain)
+                Text(fitting.event.name)
+                    .font(.cardTitle)
+                    .foregroundStyle(Color.ink)
+                    .multilineTextAlignment(.leading)
 
                 tagFlow
 
@@ -113,9 +98,19 @@ struct FriendFittingCard: View {
                         .foregroundStyle(Color.ink)
                 }
 
-                Text(venueName)
-                    .font(.cardMeta)
-                    .foregroundStyle(Color.ink.opacity(0.62))
+                HStack(alignment: .center) {
+                    Text(relativeDateText)
+                        .font(.cardMeta)
+                        .foregroundStyle(Color.ink.opacity(0.62))
+
+                    Spacer()
+
+                    BookmarkButton(
+                        isBookmarked: isBookmarked,
+                        accessibilityName: "fitting",
+                        onToggle: onToggleBookmark
+                    )
+                }
             }
             .padding(.horizontal, 24)
             .padding(.top, 18)
@@ -123,17 +118,15 @@ struct FriendFittingCard: View {
         }
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.cardCream)
-        .overlay(alignment: .top) {
-            ReceiptDashedLine(color: Color.ink.opacity(0.22))
-                .padding(.horizontal, 24)
-        }
+        .contentShape(Rectangle())
+        .onTapGesture(perform: onSelectEvent)
     }
 
     private var avatar: some View {
-        Text(initials.isEmpty ? "?" : initials)
-            .font(.subheadline.weight(.bold))
-            .foregroundStyle(Color.ivory)
-            .frame(width: 40, height: 40)
+            Text(initials.isEmpty ? "?" : initials)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(Color.ivory)
+            .frame(width: 34, height: 34)
             .background(Color.teal, in: Circle())
     }
 
@@ -157,7 +150,11 @@ struct FriendFittingCard: View {
 
     @ViewBuilder
     private var tagFlow: some View {
-        let tags = (fitting.vibeTags.sortedRawValues + fitting.danceStylesTonight.sortedRawValues)
+        let vibeTitles = fitting.vibeTags
+            .filter(\.isVisibleTag)
+            .map(\.displayTitle)
+            .sorted()
+        let tags = vibeTitles + fitting.danceStylesTonight.sortedRawValues
 
         if !tags.isEmpty {
             FlowChipLayout {

@@ -81,6 +81,8 @@ struct PlanCalendarView<EventRow: View>: View {
             Section(selectedDate.formatted(.dateTime.weekday(.wide).month(.abbreviated).day()).uppercased()) {
                 ForEach(selectedDayEvents) { event in
                     eventRow(event)
+                        .padding(16)
+                        .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
                 }
             }
         }

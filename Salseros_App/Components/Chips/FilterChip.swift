@@ -13,7 +13,7 @@ struct FilterChip: View {
     var body: some View {
         Text(title)
             .font(.eyebrow)
-            .foregroundStyle(isActive ? Color.ivory : Color.mutedIvory)
+            .foregroundStyle(Color.ivory)
             .padding(.horizontal, 12)
             .padding(.vertical, 8)
             .background(isActive ? Color.teal : Color.ivory.opacity(0.12), in: Capsule())

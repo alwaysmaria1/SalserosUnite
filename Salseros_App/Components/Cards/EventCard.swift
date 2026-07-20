@@ -15,27 +15,50 @@ struct EventCard: View {
     let onEditFitting: (Fitting) -> Void
 
     private var subtitleParts: [String] {
-        [
-            event.venue?.name ?? "",
-            event.eventMeasurements.hours,
-            event.eventMeasurements.coverCharge
-        ].filter { !$0.isEmpty }
+        [event.venue?.name ?? ""].filter { !$0.isEmpty }
     }
 
     private var additionalGoingCount: Int {
         max(0, event.goingCount - event.friendsGoing.count)
     }
 
-    private var swatches: [EventSwatch] {
+    private var dateTimeText: String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "EEE M/d"
+        let dateText = formatter.string(from: event.nextDate).replacingOccurrences(of: "Thu", with: "Thurs")
+        return "\(dateText) @ \(startTimeText)"
+    }
+
+    private var startTimeText: String {
+        let start = event.eventMeasurements.hours
+            .components(separatedBy: "-")
+            .first?
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard let start, !start.isEmpty else {
+            return event.nextDate.formatted(.dateTime.hour(.defaultDigits(amPM: .abbreviated)).minute(.omitted))
+        }
+
+        return start
+            .replacingOccurrences(of: "AM", with: " AM")
+            .replacingOccurrences(of: "PM", with: " PM")
+    }
+
+    private var swatches: [EventDisplayTag] {
         let difficultySwatches = displayedDifficulties
             .sorted { $0.rawValue < $1.rawValue }
-            .map { EventSwatch(title: $0.shortTitle, style: .level) }
+            .map { EventDisplayTag(title: $0.shortTitle, style: .difficulty) }
 
         let vibeSwatches = event.topVibes
-            .prefix(3)
-            .map { EventSwatch(title: $0.rawValue, style: .vibe) }
+            .prefix(2)
+            .map { EventDisplayTag(title: $0.displayTitle, style: .standard) }
 
-        return Array((difficultySwatches + vibeSwatches).prefix(4))
+        let danceSwatches = event.allDanceStyles
+            .sortedRawValues
+            .prefix(2)
+            .map { EventDisplayTag(title: $0, style: .standard) }
+
+        return Array((difficultySwatches + vibeSwatches + danceSwatches).prefix(5))
     }
 
     private var displayedDifficulties: Set<Difficulty> {
@@ -49,17 +72,18 @@ struct EventCard: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             HStack(alignment: .firstTextBaseline) {
                 Text(event.name)
-                    .font(.cardTitle)
+                    .font(.headline.weight(.bold))
                     .foregroundStyle(Color.ink)
+                    .lineLimit(2)
 
                 Spacer(minLength: 12)
 
                 if event.isFavorite {
                     Text("favorite")
-                        .font(.eyebrow)
+                        .font(.caption2.weight(.bold))
                         .foregroundStyle(Color.rust)
                 }
 
@@ -72,14 +96,15 @@ struct EventCard: View {
 
             if !subtitleParts.isEmpty {
                 Text(subtitleParts.joined(separator: " · "))
-                    .font(.cardMeta)
+                    .font(.caption.weight(.semibold))
                     .foregroundStyle(Color.ink.opacity(0.62))
+                    .lineLimit(1)
             }
 
             if !swatches.isEmpty {
                 FlowChipLayout {
                     ForEach(swatches) { swatch in
-                        EventSwatchView(swatch: swatch)
+                        EventTagChip(tag: swatch)
                     }
                 }
             }
@@ -95,8 +120,12 @@ struct EventCard: View {
                 )
             }
         }
-        .padding(.vertical, 8)
+        .padding(.vertical, 4)
         .listRowBackground(Color.cardCream)
+        .overlay(alignment: .topLeading) {
+            PinView()
+                .offset(x: 10, y: -25)
+        }
     }
 
     @ViewBuilder
@@ -104,66 +133,51 @@ struct EventCard: View {
         let visibleFriends = Array(event.friendsGoing.prefix(3))
 
         if visibleFriends.isEmpty && additionalGoingCount == 0 {
-            Text("No one going yet")
-                .font(.cardMeta)
-                .foregroundStyle(Color.ink.opacity(0.62))
+            HStack(spacing: 8) {
+                if !event.eventMeasurements.hours.isEmpty {
+                    Text(dateTimeText)
+                        .font(.eyebrow)
+                        .foregroundStyle(Color.rust)
+                        .lineLimit(1)
+                }
+
+                Text("No one going yet")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.ink.opacity(0.62))
+                    .lineLimit(1)
+            }
         } else {
-            Text(summaryText(for: visibleFriends))
-                .font(.cardMeta)
-                .foregroundStyle(Color.ink.opacity(0.62))
+            HStack(spacing: 8) {
+                if !event.eventMeasurements.hours.isEmpty {
+                    Text(dateTimeText)
+                        .font(.eyebrow)
+                        .foregroundStyle(Color.rust)
+                        .lineLimit(1)
+                }
+
+                Text(summaryText(for: visibleFriends))
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.ink.opacity(0.62))
+                    .lineLimit(1)
+            }
         }
     }
 
     private func summaryText(for visibleFriends: [String]) -> String {
-        var parts = visibleFriends
-
-        if additionalGoingCount > 0 {
-            parts.append("+ \(additionalGoingCount) going")
+        if let firstFriend = visibleFriends.first {
+            return additionalGoingCount > 0 ? "\(firstFriend) + \(additionalGoingCount) going" : "\(firstFriend)'s going"
         }
 
-        return parts.joined(separator: " · ")
+        return event.goingCount > 0 ? "\(event.goingCount)+ going" : "No one going yet"
     }
 }
 
-private struct EventSwatch: Identifiable {
-    let title: String
-    let style: EventSwatchStyle
-
-    var id: String { "\(style.rawValue)-\(title)" }
-}
-
-private enum EventSwatchStyle: String {
-    case level
-    case vibe
-
-    var foregroundColor: Color {
-        switch self {
-        case .level:
-            Color.ivory
-        case .vibe:
-            Color.teal
-        }
-    }
-
-    var backgroundColor: Color {
-        switch self {
-        case .level:
-            Color.teal
-        case .vibe:
-            Color.rust.opacity(0.18)
-        }
-    }
-}
-
-private struct EventSwatchView: View {
-    let swatch: EventSwatch
-
+private struct PinView: View {
     var body: some View {
-        Text(swatch.title)
-            .font(.eyebrow)
-            .foregroundStyle(swatch.style.foregroundColor)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 6)
-            .background(swatch.style.backgroundColor, in: Capsule())
+        Circle()
+            .fill(Color(red: 0.95, green: 0.42, blue: 0.08))
+            .frame(width: 18, height: 18)
+            .shadow(color: Color.ink.opacity(0.35), radius: 4, x: 0, y: 3)
     }
 }
+

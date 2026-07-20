@@ -51,7 +51,7 @@ final class Event {
     // MARK: Crowdsourced information for Events Card from reviews
 
     //Goal here is to showcase a couple of the vibes as tags next to event cards
-    //(like an event is summery and casual)
+    //(like an event is outdoors and relaxed)
     //Answers the Q: "Which vibes have been reported most often for this event?"
     var topVibes: [Vibe] {
         //pulls out all the tags for all fittings into 1 list
@@ -67,7 +67,7 @@ final class Event {
 
             return $0.value > $1.value
         }
-        return sorted.map { $0.key }
+        return sorted.map { $0.key }.filter(\.isVisibleTag)
     }
 
     var allDanceStyles: Set<DanceStyle> {

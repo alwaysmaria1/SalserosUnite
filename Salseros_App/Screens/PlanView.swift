@@ -8,6 +8,7 @@
 
 import SwiftUI
 import SwiftData
+import UIKit
 
 struct PlanView: View {
     @Query(sort: \Event.nextDate) private var events: [Event]
@@ -16,14 +17,19 @@ struct PlanView: View {
     @State private var selectedSheet: PlanSheet?
     @State private var selectedCity: String?
     @State private var selectedVibes: Set<Vibe> = []
-    @State private var selectedDifficulty: Difficulty?
+    @State private var selectedDifficulties: Set<Difficulty> = []
+    @State private var showsMyEventsOnly = false
     @State private var selectedDisplayMode: PlanDisplayMode = .list
 
     private let calendar = Calendar.current
 
+    init() {
+        configureSegmentedControlAppearance()
+    }
+
     private var filteredEvents: [Event] {
         events.filter { event in
-            matchesCity(event) && matchesVibe(event) && matchesDifficulty(event)
+            matchesCity(event) && matchesVibe(event) && matchesDifficulty(event) && matchesMyEvents(event)
         }
     }
 
@@ -81,13 +87,29 @@ struct PlanView: View {
         .espressoBackground()
     }
 
+    private func configureSegmentedControlAppearance() {
+        let selectedAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor(Color.ivory)
+        ]
+        let normalAttributes: [NSAttributedString.Key: Any] = [
+            .foregroundColor: UIColor(Color.ink)
+        ]
+
+        UISegmentedControl.appearance().backgroundColor = UIColor(Color.cardCream)
+        UISegmentedControl.appearance().selectedSegmentTintColor = UIColor(Color.rust)
+        UISegmentedControl.appearance().setTitleTextAttributes(normalAttributes, for: .normal)
+        UISegmentedControl.appearance().setTitleTextAttributes(selectedAttributes, for: .selected)
+    }
+
     private var header: some View {
         HStack(alignment: .center) {
-            Text("Upcoming")
-                .font(.displaySerif)
+            Text("Upcoming Socials")
+                .font(.title3.weight(.bold))
                 .foregroundStyle(Color.ivory)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
 
-            Spacer(minLength: 16)
+            Spacer(minLength: 10)
 
             Picker("Display", selection: $selectedDisplayMode) {
                 ForEach(PlanDisplayMode.allCases) { mode in
@@ -95,8 +117,8 @@ struct PlanView: View {
                 }
             }
             .pickerStyle(.segmented)
-            .frame(width: 178)
-            .tint(Color.ivory)
+            .frame(width: 150)
+            .tint(Color.rust)
         }
     }
 
@@ -112,9 +134,29 @@ struct PlanView: View {
 
     @ViewBuilder
     private var listContent: some View {
-        eventSection("TONIGHT", events: tonightEvents)
+        tonightSection
         eventSection("NEXT WEEK", events: nextWeekEvents)
         emptyStateIfNeeded
+    }
+
+    @ViewBuilder
+    private var tonightSection: some View {
+        if tonightEvents.isEmpty {
+            VStack(alignment: .leading, spacing: 12) {
+                Text("TONIGHT")
+                    .font(.eyebrow)
+                    .foregroundStyle(Color.ivory.opacity(0.82))
+
+                Text("No events tonight")
+                    .font(.cardMeta)
+                    .foregroundStyle(Color.ink.opacity(0.68))
+                    .padding(16)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
+            }
+        } else {
+            eventSection("TONIGHT", events: tonightEvents)
+        }
     }
 
     @ViewBuilder
@@ -127,19 +169,24 @@ struct PlanView: View {
     @ViewBuilder
     private var emptyStateIfNeeded: some View {
         if tonightEvents.isEmpty && nextWeekEvents.isEmpty {
-            ContentUnavailableView(
-                "No Events Match",
-                systemImage: "line.3.horizontal.decrease.circle",
-                description: Text("Try clearing a filter or choosing a different vibe.")
-            )
-            .padding()
+            VStack(alignment: .leading, spacing: 6) {
+                Text("No events match")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(Color.ink.opacity(0.86))
+
+                Text("Try clearing a filter or choosing a different vibe.")
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(Color.ink.opacity(0.62))
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
         }
     }
 
     private var filtersSection: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
-            HStack(spacing: 12) {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 10) {
                 Menu {
                     Button("Any city") { selectedCity = nil }
 
@@ -148,43 +195,73 @@ struct PlanView: View {
                     }
                 } label: {
                     Label(selectedCity ?? "City", systemImage: "mappin.circle")
-                        .font(.eyebrow)
+                        .font(.caption.weight(.bold))
                         .foregroundStyle(selectedCity == nil ? Color.ink : Color.ivory)
-                        .padding(.horizontal, 16)
-                        .padding(.vertical, 10)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
                         .background(selectedCity == nil ? Color.ivory : Color.teal, in: Capsule())
                 }
 
-                ForEach(Vibe.allCases) { vibe in
-                    Button {
-                        toggleVibe(vibe)
-                    } label: {
-                        FilterChip(title: vibe.rawValue, isActive: selectedVibes.contains(vibe))
-                    }
-                    .buttonStyle(.plain)
+                Button {
+                    showsMyEventsOnly.toggle()
+                } label: {
+                    Text("My events")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(Color.ivory)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(showsMyEventsOnly ? Color.teal : Color.ivory.opacity(0.12), in: Capsule())
+                        .overlay {
+                            Capsule()
+                                .stroke(showsMyEventsOnly ? Color.teal : Color.ivory.opacity(0.28), lineWidth: 1)
+                        }
                 }
+                .buttonStyle(.plain)
 
-                ForEach(Difficulty.allCases) { difficulty in
-                    Button {
-                        toggleDifficulty(difficulty)
-                    } label: {
-                        FilterChip(title: difficulty.shortTitle, isActive: selectedDifficulty == difficulty)
+                Menu {
+                    Button("Any difficulty") { selectedDifficulties.removeAll() }
+
+                    ForEach(Difficulty.allCases) { difficulty in
+                        Button {
+                            toggleDifficulty(difficulty)
+                        } label: {
+                            Text("\(selectedDifficulties.contains(difficulty) ? "Selected: " : "")\(difficulty.rawValue)")
+                        }
                     }
-                    .buttonStyle(.plain)
+                } label: {
+                    Label(difficultyFilterTitle, systemImage: "slider.horizontal.3")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(selectedDifficulties.isEmpty ? Color.ink : Color.ivory)
+                        .padding(.horizontal, 14)
+                        .padding(.vertical, 9)
+                        .background(selectedDifficulties.isEmpty ? Color.ivory : Color.rust, in: Capsule())
                 }
 
                 if hasActiveFilters {
                     Button("Clear") {
                         clearFilters()
                     }
-                    .font(.eyebrow)
+                    .font(.caption.weight(.bold))
                     .foregroundStyle(Color.ivory)
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 10)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 9)
                     .background(Color.rust, in: Capsule())
                 }
             }
-            .padding(.vertical, 2)
+
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack(spacing: 10) {
+                    ForEach(Vibe.filterCases) { vibe in
+                        Button {
+                            toggleVibe(vibe)
+                        } label: {
+                            FilterChip(title: vibe.displayTitle, isActive: selectedVibes.contains(vibe))
+                        }
+                        .buttonStyle(.plain)
+                    }
+                }
+                .padding(.vertical, 2)
+            }
         }
     }
 
@@ -229,13 +306,28 @@ struct PlanView: View {
     }
 
     private var hasActiveFilters: Bool {
-        selectedCity != nil || !selectedVibes.isEmpty || selectedDifficulty != nil
+        selectedCity != nil || !selectedVibes.isEmpty || !selectedDifficulties.isEmpty || showsMyEventsOnly
+    }
+
+    private var difficultyFilterTitle: String {
+        guard !selectedDifficulties.isEmpty else { return "Level" }
+
+        let titles = selectedDifficulties
+            .map(\.shortTitle)
+            .sorted()
+
+        if titles.count > 2 {
+            return "\(titles.prefix(2).joined(separator: ", ")) +\(titles.count - 2)"
+        }
+
+        return titles.joined(separator: ", ")
     }
 
     private func clearFilters() {
         selectedCity = nil
         selectedVibes.removeAll()
-        selectedDifficulty = nil
+        selectedDifficulties.removeAll()
+        showsMyEventsOnly = false
     }
 
     private func toggleVibe(_ vibe: Vibe) {
@@ -247,7 +339,11 @@ struct PlanView: View {
     }
 
     private func toggleDifficulty(_ difficulty: Difficulty) {
-        selectedDifficulty = selectedDifficulty == difficulty ? nil : difficulty
+        if selectedDifficulties.contains(difficulty) {
+            selectedDifficulties.remove(difficulty)
+        } else {
+            selectedDifficulties.insert(difficulty)
+        }
     }
 
     private func matchesCity(_ event: Event) -> Bool {
@@ -261,14 +357,20 @@ struct PlanView: View {
     }
 
     private func matchesDifficulty(_ event: Event) -> Bool {
-        guard let selectedDifficulty else { return true }
+        guard !selectedDifficulties.isEmpty else { return true }
         let difficulties = event.allDifficulties
 
-        if selectedDifficulty == .allWelcome {
-            return difficulties.contains(.allWelcome) || Difficulty.coreLevels.isSubset(of: difficulties)
-        }
+        return selectedDifficulties.contains { selectedDifficulty in
+            if selectedDifficulty == .allWelcome {
+                return difficulties.contains(.allWelcome) || Difficulty.coreLevels.isSubset(of: difficulties)
+            }
 
-        return difficulties.contains(selectedDifficulty) || difficulties.contains(.allWelcome)
+            return difficulties.contains(selectedDifficulty) || difficulties.contains(.allWelcome)
+        }
+    }
+
+    private func matchesMyEvents(_ event: Event) -> Bool {
+        !showsMyEventsOnly || event.isFavorite || event.isRSVPed
     }
 }
 

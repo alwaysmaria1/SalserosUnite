@@ -26,19 +26,19 @@ struct CalendarDayButton: View {
                 if eventCount > 0 {
                     Text("\(eventCount)")
                         .font(.eyebrow)
-                        .foregroundStyle(isSelected ? Color.ivory : Color.rust)
+                        .foregroundStyle(Color.ivory)
                 } else {
                     Text(" ")
                         .font(.eyebrow)
                 }
             }
-            .foregroundStyle(isSelected ? Color.ivory : Color.ink)
+                        .foregroundStyle(isSelected ? Color.ivory : Color.ink)
             .frame(maxWidth: .infinity, minHeight: 44)
             .background(backgroundColor, in: RoundedRectangle(cornerRadius: 8))
             .overlay {
                 if isToday && !isSelected {
                     RoundedRectangle(cornerRadius: 8)
-                        .stroke(Color.rust, lineWidth: 1)
+                        .stroke(Color(red: 0.95, green: 0.42, blue: 0.08), lineWidth: 1)
                 }
             }
         }
@@ -52,7 +52,7 @@ struct CalendarDayButton: View {
         }
 
         if eventCount > 0 {
-            return Color.rust.opacity(0.16)
+            return Color(red: 0.95, green: 0.42, blue: 0.08).opacity(0.86)
         }
 
         return Color.cardCream

@@ -19,7 +19,7 @@ struct BookmarkButton: View {
                 .font(.title3)
         }
         .buttonStyle(.plain)
-        .foregroundStyle(isBookmarked ? Color.rust : Color.ink.opacity(0.82))
+        .foregroundStyle(isBookmarked ? Color.rust : Color.rust)
         .accessibilityLabel(accessibilityLabel)
     }
 
