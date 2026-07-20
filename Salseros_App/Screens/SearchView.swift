@@ -11,12 +11,13 @@ import SwiftUI
 import SwiftData
 
 struct SearchView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Event.name) private var events: [Event]
+    @Query private var profiles: [UserProfile]
 
     @State private var searchText = ""
     @State private var selectedEventForDetails: Event?
     @State private var selectedSheet: SearchSheet?
-    @State private var bookmarkedEventIDs: Set<PersistentIdentifier> = []
 
     private var filteredEvents: [Event] {
         let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -84,18 +85,19 @@ struct SearchView: View {
         }
     }
 
+    private var currentUser: UserProfile {
+        profiles.currentUser ?? UserProfile.current(in: modelContext)
+    }
+
     private func isBookmarked(_ event: Event) -> Bool {
-        bookmarkedEventIDs.contains(event.persistentModelID)
+        currentUser.isBookmarked(event)
     }
 
     private func toggleBookmark(for event: Event) {
-        let eventID = event.persistentModelID
-
-        if bookmarkedEventIDs.contains(eventID) {
-            bookmarkedEventIDs.remove(eventID)
-        } else {
-            bookmarkedEventIDs.insert(eventID)
-        }
+        let isBookmarked = !currentUser.isBookmarked(event)
+        event.isFavorite = isBookmarked
+        currentUser.setBookmark(isBookmarked, for: event)
+        try? modelContext.save()
     }
 
     @ViewBuilder

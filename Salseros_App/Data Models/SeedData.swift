@@ -21,7 +21,7 @@ enum SeedData {
         let venues = (try? context.fetch(FetchDescriptor<Venue>())) ?? []
         let events = (try? context.fetch(FetchDescriptor<Event>())) ?? []
 
-        _ = profiles.first ?? makeUserProfile(in: context)
+        _ = profiles.currentUser ?? makeUserProfile(in: context)
         let mamboCity = venue(named: "Mambo City", from: venues, context: context) {
             Venue(name: "Mambo City", city: "Chicago", address: "123 W Example St, Avondale")
         }

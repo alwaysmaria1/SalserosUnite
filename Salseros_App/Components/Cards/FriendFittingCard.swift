@@ -10,8 +10,8 @@ import SwiftUI
 
 struct FriendFittingCard: View {
     let fitting: Fitting
-    let isBookmarked: Bool
-    let onToggleBookmark: () -> Void
+    let isEventBookmarked: Bool
+    let onToggleEventBookmark: () -> Void
     let onSelectEvent: () -> Void
 
     private var relativeDateText: String {
@@ -106,9 +106,9 @@ struct FriendFittingCard: View {
                     Spacer()
 
                     BookmarkButton(
-                        isBookmarked: isBookmarked,
-                        accessibilityName: "fitting",
-                        onToggle: onToggleBookmark
+                        isBookmarked: isEventBookmarked,
+                        accessibilityName: "event",
+                        onToggle: onToggleEventBookmark
                     )
                 }
             }

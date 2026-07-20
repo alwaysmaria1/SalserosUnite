@@ -11,7 +11,9 @@ import SwiftData
 import UIKit
 
 struct PlanView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Event.nextDate) private var events: [Event]
+    @Query private var profiles: [UserProfile]
 
     @State private var selectedEventForDetails: Event?
     @State private var selectedSheet: PlanSheet?
@@ -369,8 +371,12 @@ struct PlanView: View {
         }
     }
 
+    private var currentUser: UserProfile {
+        profiles.currentUser ?? UserProfile.current(in: modelContext)
+    }
+
     private func matchesMyEvents(_ event: Event) -> Bool {
-        !showsMyEventsOnly || event.isFavorite || event.isRSVPed
+        !showsMyEventsOnly || currentUser.isBookmarked(event) || event.isRSVPed
     }
 }
 

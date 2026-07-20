@@ -7,9 +7,12 @@
 // Detail screen for venue, event info, and fitting reviews.
 
 import SwiftUI
+import SwiftData
 
 struct EventDetailsScreen: View {
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [UserProfile]
 
     let event: Event
     let userFitting: Fitting?
@@ -119,10 +122,10 @@ struct EventDetailsScreen: View {
                 circleIconButton("chevron.left", action: { dismiss() })
                 Spacer()
                 circleIconButton(
-                    event.isFavorite ? "bookmark.fill" : "bookmark",
-                    isSelected: event.isFavorite
+                    currentUser.isBookmarked(event) ? "bookmark.fill" : "bookmark",
+                    isSelected: currentUser.isBookmarked(event)
                 ) {
-                    event.isFavorite.toggle()
+                    toggleBookmark()
                 }
             }
             .padding(.horizontal, 12)
@@ -195,7 +198,7 @@ struct EventDetailsScreen: View {
                 Spacer(minLength: 8)
 
                 RSVPButton(isRSVPed: event.isRSVPed) {
-                    event.isRSVPed.toggle()
+                    toggleRSVP()
                 }
                 .scaleEffect(0.86)
             }
@@ -261,8 +264,8 @@ struct EventDetailsScreen: View {
             if let fitting = sortedFittings.first {
                 FriendFittingCard(
                     fitting: fitting,
-                    isBookmarked: false,
-                    onToggleBookmark: {},
+                    isEventBookmarked: currentUser.isBookmarked(fitting.event),
+                    onToggleEventBookmark: { toggleBookmark() },
                     onSelectEvent: {}
                 )
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -364,9 +367,26 @@ struct EventDetailsScreen: View {
         .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
     }
 
+    private var currentUser: UserProfile {
+        profiles.currentUser ?? UserProfile.current(in: modelContext)
+    }
+
     private func fittingCount(for name: String) -> Int {
         event.fittings.filter { $0.loggedByName == name }.count
     }
+
+    private func toggleRSVP() {
+        event.isRSVPed.toggle()
+        try? modelContext.save()
+    }
+
+    private func toggleBookmark() {
+        let isBookmarked = !currentUser.isBookmarked(event)
+        event.isFavorite = isBookmarked
+        currentUser.setBookmark(isBookmarked, for: event)
+        try? modelContext.save()
+    }
+
 
     private func circleIconButton(
         _ systemImage: String,

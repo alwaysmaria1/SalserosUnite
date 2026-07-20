@@ -7,9 +7,12 @@
 // Confirmation screen shown after saving a fitting.
 
 import SwiftUI
+import SwiftData
 
 //Once a user finishes a review/fitting
 struct FittingConfirmationView: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [UserProfile]
     let fitting: Fitting
     let onDone: () -> Void
 
@@ -19,6 +22,10 @@ struct FittingConfirmationView: View {
 
     private var titleText: String {
         "a \(fitting.verdict.rawValue.lowercased()) night"
+    }
+
+    private var currentUser: UserProfile {
+        profiles.currentUser ?? UserProfile.current(in: modelContext)
     }
 
     var body: some View {
@@ -41,7 +48,7 @@ struct FittingConfirmationView: View {
             }
 
             Button {
-                fitting.event.isFavorite = true
+                makeStandingOrder()
             } label: {
                 Label("MAKE IT A STANDING ORDER", systemImage: "heart")
                     .frame(maxWidth: .infinity)
@@ -60,5 +67,11 @@ struct FittingConfirmationView: View {
         }
         .padding()
         .espressoBackground()
+    }
+
+    private func makeStandingOrder() {
+        fitting.event.isFavorite = true
+        currentUser.setBookmark(true, for: fitting.event)
+        try? modelContext.save()
     }
 }

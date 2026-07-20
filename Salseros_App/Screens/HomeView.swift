@@ -10,12 +10,13 @@ import SwiftUI
 import SwiftData
  
 struct HomeView: View {
+    @Environment(\.modelContext) private var modelContext
     @Query(sort: \Fitting.date, order: .reverse) private var fittings: [Fitting]
     @Query(sort: \Event.nextDate) private var events: [Event]
+    @Query private var profiles: [UserProfile]
     let onLogNight: () -> Void
     let onPlan: () -> Void
 
-    @State private var bookmarkedFittingIDs: Set<PersistentIdentifier> = []
     @State private var selectedEventForDetails: Event?
     @State private var selectedSheet: HomeSheet?
 
@@ -75,6 +76,7 @@ struct HomeView: View {
                 .padding(.top, 12)
             }
             .espressoBackground()
+            .scrollBounceBehavior(.basedOnSize)
             .toolbar(.hidden, for: .navigationBar)
             .navigationDestination(item: $selectedEventForDetails) { event in
                 EventDetailsScreen(
@@ -102,7 +104,7 @@ struct HomeView: View {
 
             if let featuredEvent {
                 Text(currentDateLabel)
-                    .font(.caption.weight(.bold))
+                    .font(.subheadline.weight(.bold))
                     .foregroundStyle(Color.ivory.opacity(0.7))
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal, 24)
@@ -142,7 +144,7 @@ struct HomeView: View {
                 Spacer(minLength: 10)
 
                 RSVPButton(isRSVPed: event.isRSVPed) {
-                    event.isRSVPed.toggle()
+                    toggleRSVP(for: event)
                 }
                 .fixedSize(horizontal: true, vertical: false)
                 .scaleEffect(0.78, anchor: .bottomTrailing)
@@ -226,8 +228,8 @@ struct HomeView: View {
                 ForEach(Array(friendFittings.enumerated()), id: \.element.persistentModelID) { index, fitting in
                     FriendFittingCard(
                         fitting: fitting,
-                        isBookmarked: isBookmarked(fitting),
-                        onToggleBookmark: { toggleBookmark(for: fitting) },
+                        isEventBookmarked: currentUser.isBookmarked(fitting.event),
+                        onToggleEventBookmark: { toggleBookmark(for: fitting.event) },
                         onSelectEvent: { selectedEventForDetails = fitting.event }
                     )
 
@@ -236,6 +238,15 @@ struct HomeView: View {
                             .fill(Color.ink.opacity(0.14))
                             .frame(height: 1)
                     }
+                }
+
+                VStack(spacing: 0) {
+                    Color.cardCream
+                        .frame(height: 96)
+
+                    Rectangle()
+                        .fill(Color.ink.opacity(0.14))
+                        .frame(height: 1)
                 }
             }
             .overlay(alignment: .top) {
@@ -255,18 +266,24 @@ struct HomeView: View {
         }
     }
 
-    private func isBookmarked(_ fitting: Fitting) -> Bool {
-        bookmarkedFittingIDs.contains(fitting.persistentModelID)
+    private var currentUser: UserProfile {
+        profiles.currentUser ?? UserProfile.current(in: modelContext)
     }
 
-    private func toggleBookmark(for fitting: Fitting) {
-        let fittingID = fitting.persistentModelID
+    private func toggleBookmark(for event: Event) {
+        let isBookmarked = !currentUser.isBookmarked(event)
+        event.isFavorite = isBookmarked
+        currentUser.setBookmark(isBookmarked, for: event)
+        saveUserState()
+    }
 
-        if bookmarkedFittingIDs.contains(fittingID) {
-            bookmarkedFittingIDs.remove(fittingID)
-        } else {
-            bookmarkedFittingIDs.insert(fittingID)
-        }
+    private func toggleRSVP(for event: Event) {
+        event.isRSVPed.toggle()
+        saveUserState()
+    }
+
+    private func saveUserState() {
+        try? modelContext.save()
     }
 }
 

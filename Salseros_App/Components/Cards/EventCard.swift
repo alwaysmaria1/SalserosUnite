@@ -7,8 +7,11 @@
 // Reusable card showing an event summary and fitting action.
 
 import SwiftUI
+import SwiftData
 
 struct EventCard: View {
+    @Environment(\.modelContext) private var modelContext
+    @Query private var profiles: [UserProfile]
     let event: Event
     let userFitting: Fitting?
     let onAddFitting: () -> Void
@@ -81,7 +84,7 @@ struct EventCard: View {
 
                 Spacer(minLength: 12)
 
-                if event.isFavorite {
+                if currentUser.isBookmarked(event) {
                     Text("favorite")
                         .font(.caption2.weight(.bold))
                         .foregroundStyle(Color.rust)
@@ -116,7 +119,7 @@ struct EventCard: View {
 
                 RSVPButton(
                     isRSVPed: event.isRSVPed,
-                    onToggle: { event.isRSVPed.toggle() }
+                    onToggle: toggleRSVP
                 )
             }
         }
@@ -126,6 +129,15 @@ struct EventCard: View {
             PinView()
                 .offset(x: 10, y: -25)
         }
+    }
+
+    private var currentUser: UserProfile {
+        profiles.currentUser ?? UserProfile.current(in: modelContext)
+    }
+
+    private func toggleRSVP() {
+        event.isRSVPed.toggle()
+        try? modelContext.save()
     }
 
     @ViewBuilder

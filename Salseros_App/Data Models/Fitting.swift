@@ -23,6 +23,7 @@ final class Fitting {
     var leadFollowRatio: LeadFollowRatio
     var note: String
     var loggedByName: String
+
  
     init(
         date: Date = .now,

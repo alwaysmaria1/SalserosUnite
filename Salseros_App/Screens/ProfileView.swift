@@ -15,8 +15,8 @@ struct ProfileView: View {
 
     //hardcoded since right now it's only one user
     //if there was a log-in then this should match logged in user
-    private var profile: UserProfile? {
-        profiles.first
+    private var currentUser: UserProfile? {
+        profiles.currentUser
     }
 
     //This is dynamically calculated each time
@@ -35,16 +35,16 @@ struct ProfileView: View {
         NavigationStack {
             List {
                 Section("Profile") {
-                    LabeledContent("Name", value: profile?.name ?? "You")
+                    LabeledContent("Name", value: currentUser?.name ?? "You")
                         .font(.cardMeta)
                     LabeledContent("Nights this year", value: "\(nightsThisYear)")
                         .font(.cardMeta)
                 }
                 .listRowBackground(Color.cardCream)
 
-                if let profile, !profile.preferredStyles.isEmpty {
+                if let currentUser, !currentUser.preferredStyles.isEmpty {
                     Section("Preferred styles") {
-                        ForEach(profile.preferredStyles.map(\.rawValue).sorted(), id: \.self) { style in
+                        ForEach(currentUser.preferredStyles.map(\.rawValue).sorted(), id: \.self) { style in
                             Text(style)
                                 .font(.cardMeta)
                                 .foregroundStyle(Color.ink)
@@ -53,9 +53,9 @@ struct ProfileView: View {
                     .listRowBackground(Color.cardCream)
                 }
 
-                if let profile, !profile.friendNames.isEmpty {
+                if let currentUser, !currentUser.friendNames.isEmpty {
                     Section("Friends") {
-                        ForEach(profile.friendNames, id: \.self) { friendName in
+                        ForEach(currentUser.friendNames, id: \.self) { friendName in
                             Text(friendName)
                                 .font(.cardMeta)
                                 .foregroundStyle(Color.ink)

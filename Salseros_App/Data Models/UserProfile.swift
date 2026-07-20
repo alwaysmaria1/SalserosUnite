@@ -4,20 +4,6 @@
 //
 //  Created by Noelia Herne on 7/6/26.
 //
-//
-//  UserProfile.swift
-//  SalsaLog
-//
-//  Only one UserProfile exists today - this is your local profile.
-//  Because it's already its own entity rather than baked into settings,
-//  real multi-profile switching later just means: allow multiple
-//  UserProfile rows + track which one is "active" - not a redesign.
-//
-//  friendNames is a plain list of strings for now - no separate Friend
-//  table, since a name is all a seeded friend needs. This can become a
-//  list of real linked User references later without changing anything
-//  that reads it today.
-//
 // SwiftData model for the local user's profile.
 
 import Foundation
@@ -32,15 +18,53 @@ final class UserProfile {
     var joinDate: Date
     var friendNames: [String]
 
+    @Relationship var bookmarkedEvents: [Event] = []
+
     init(
         name: String = "",
         preferredStyles: Set<DanceStyle> = [],
         joinDate: Date = .now,
-        friendNames: [String] = []
+        friendNames: [String] = [],
+        bookmarkedEvents: [Event] = []
     ) {
         self.name = name
         self.preferredStyles = preferredStyles
         self.joinDate = joinDate
         self.friendNames = friendNames
+        self.bookmarkedEvents = bookmarkedEvents
+    }
+
+    @MainActor
+    static func current(in context: ModelContext) -> UserProfile {
+        let profiles = (try? context.fetch(FetchDescriptor<UserProfile>())) ?? []
+
+        if let profile = profiles.currentUser {
+            return profile
+        }
+
+        let profile = UserProfile(name: "Noe")
+        context.insert(profile)
+        return profile
+    }
+
+    func isBookmarked(_ event: Event) -> Bool {
+        bookmarkedEvents.contains { $0.persistentModelID == event.persistentModelID }
+    }
+
+
+    func setBookmark(_ isBookmarked: Bool, for event: Event) {
+        if isBookmarked {
+            guard !self.isBookmarked(event) else { return }
+            bookmarkedEvents.append(event)
+        } else {
+            bookmarkedEvents.removeAll { $0.persistentModelID == event.persistentModelID }
+        }
+    }
+
+}
+
+extension Collection where Element == UserProfile {
+    var currentUser: UserProfile? {
+        first
     }
 }
