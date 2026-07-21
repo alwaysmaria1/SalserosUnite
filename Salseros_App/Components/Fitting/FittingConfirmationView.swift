@@ -7,12 +7,9 @@
 // Confirmation screen shown after saving a fitting.
 
 import SwiftUI
-import SwiftData
 
 //Once a user finishes a review/fitting
 struct FittingConfirmationView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var profiles: [UserProfile]
     let fitting: Fitting
     let onDone: () -> Void
 
@@ -24,36 +21,39 @@ struct FittingConfirmationView: View {
         "a \(fitting.verdict.rawValue.lowercased()) night"
     }
 
-    private var currentUser: UserProfile {
-        profiles.currentUser ?? UserProfile.current(in: modelContext)
+    private var nightSummary: String {
+        "Night 2 • \(venueName)"
     }
 
     var body: some View {
-        VStack(spacing: 28) {
-            Spacer(minLength: 40)
+        ZStack {
+            Color.espresso
+                .ignoresSafeArea()
 
-            Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 72))
-                .foregroundStyle(Color.teal)
+            VStack(spacing: 0) {
+            Spacer()
 
-            VStack(spacing: 10) {
-                Text(titleText)
-                    .font(.displaySerif)
+            VStack(spacing: 22) {
+                achievementBadge
+
+                VStack(spacing: 12) {
+                    Text(titleText)
+                        .font(.system(size: 42, weight: .semibold, design: .serif).italic())
+                        .foregroundStyle(Color.ivory)
+                        .multilineTextAlignment(.center)
+
+                    VStack(spacing: 8) {
+                        Text(nightSummary)
+                            .font(.headline.weight(.bold))
+
+                        Text("stitched into your wardrobe")
+                            .font(.subheadline.weight(.bold))
+                    }
                     .foregroundStyle(Color.ivory)
                     .multilineTextAlignment(.center)
-
-                Text(venueName)
-                    .font(.cardMeta)
-                    .foregroundStyle(Color.mutedIvory)
+                }
             }
-
-            Button {
-                makeStandingOrder()
-            } label: {
-                Label("MAKE IT A STANDING ORDER", systemImage: "heart")
-                    .frame(maxWidth: .infinity)
-            }
-            .buttonStyle(OutlinePillStyle())
+            .padding(.bottom, 72)
 
             Spacer()
 
@@ -61,17 +61,37 @@ struct FittingConfirmationView: View {
                 onDone()
             } label: {
                 Text("DONE")
+                    .font(.eyebrow)
+                    .tracking(2)
                     .frame(maxWidth: .infinity)
+                    .padding(.vertical, 18)
             }
-            .buttonStyle(PillActionStyle())
+            .foregroundStyle(Color.ivory)
+            .background(Color.teal)
+            .buttonStyle(.plain)
+            .padding(.horizontal, 40)
+            .padding(.bottom, 52)
         }
-        .padding()
-        .espressoBackground()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .espressoBackground()
+        }
     }
 
-    private func makeStandingOrder() {
-        fitting.event.isFavorite = true
-        currentUser.setBookmark(true, for: fitting.event)
-        try? modelContext.save()
+    private var achievementBadge: some View {
+        ZStack {
+            Circle()
+                .fill(Color.espresso.opacity(0.62))
+                .frame(width: 156, height: 156)
+
+            Image("dancing")
+                .resizable()
+                .scaledToFit()
+                .padding(28)
+                .frame(width: 156, height: 156)
+        }
+        .overlay {
+            Circle()
+                .stroke(Color.teal, lineWidth: 4)
+        }
     }
 }

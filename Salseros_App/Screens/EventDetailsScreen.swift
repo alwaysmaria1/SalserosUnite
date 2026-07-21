@@ -85,30 +85,33 @@ struct EventDetailsScreen: View {
     var body: some View {
         ZStack(alignment: .bottom) {
             ScrollView {
+                topHeader
+
                 VStack(alignment: .leading, spacing: 18) {
-                    hero
-                    eventGradientDivider
                     eventHeader
                     nextEventSection
                     measurementsSection
                     wordOfMouthSection
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 18)
                 .padding(.bottom, 128)
             }
             .ignoresSafeArea(edges: .top)
             .espressoBackground()
-            .toolbar(.hidden, for: .navigationBar)
 
             bottomBar
         }
         .espressoBackground()
+        .navigationBarBackButtonHidden(true)
+        .toolbar(.hidden, for: .navigationBar)
     }
 
-    private var hero: some View {
-        ZStack {
-            Rectangle()
-                .fill(Color.ink.opacity(0.72))
+    private var topHeader: some View {
+        ZStack(alignment: .bottom) {
+            Color.ink
+                .opacity(0.72)
+                .ignoresSafeArea(edges: .top)
 
             HStack {
                 circleIconButton("chevron.left", action: { dismiss() })
@@ -120,24 +123,19 @@ struct EventDetailsScreen: View {
                     toggleBookmark()
                 }
             }
-            .padding(.horizontal, 12)
-            .padding(.top, 68)
+            .padding(.horizontal, 24)
+            .padding(.top, 56)
             .frame(maxHeight: .infinity, alignment: .top)
         }
         .frame(height: 110)
-        .padding(.horizontal, -24)
-    }
-
-    private var eventGradientDivider: some View {
-        LinearGradient(
-            colors: [Color.teal, Color.rust, Color(red: 0.96, green: 0.78, blue: 0.22)],
-            startPoint: .leading,
-            endPoint: .trailing
-        )
-        .frame(height: 4)
-        .padding(.horizontal, -24)
-        .padding(.top, -18)
-        .padding(.bottom, -12)
+        .overlay(alignment: .bottom) {
+            LinearGradient(
+                colors: [Color.teal, Color.rust, Color(red: 0.96, green: 0.78, blue: 0.22)],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(height: 4)
+        }
     }
 
     private var eventHeader: some View {

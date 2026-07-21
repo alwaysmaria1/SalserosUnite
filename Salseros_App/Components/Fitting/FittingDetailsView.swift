@@ -234,9 +234,12 @@ struct FittingDetailsView: View {
                     .font(.caption.weight(.bold))
                     .foregroundStyle(Color.ink)
 
-                TextField("Add a note", text: $note, axis: .vertical)
+                TextField(text: $note, prompt: Text("Add a note").foregroundStyle(Color.ink.opacity(0.42)), axis: .vertical) {
+                    EmptyView()
+                }
                     .font(.caption.weight(.semibold))
                     .foregroundStyle(Color.ink)
+                    .tint(Color.ink)
                     .lineLimit(2, reservesSpace: true)
                     .padding(10)
                     .background(Color.cardCream.opacity(0.72), in: RoundedRectangle(cornerRadius: 8))
