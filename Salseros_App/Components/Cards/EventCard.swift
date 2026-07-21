@@ -17,14 +17,6 @@ struct EventCard: View {
     let onAddFitting: () -> Void
     let onEditFitting: (Fitting) -> Void
 
-    private var subtitleParts: [String] {
-        [event.venue?.name ?? ""].filter { !$0.isEmpty }
-    }
-
-    private var additionalGoingCount: Int {
-        max(0, event.goingCount - event.friendsGoing.count)
-    }
-
     private var dateTimeText: String {
         let formatter = DateFormatter()
         formatter.dateFormat = "EEE M/d"
@@ -43,8 +35,6 @@ struct EventCard: View {
         }
 
         return start
-            .replacingOccurrences(of: "AM", with: " AM")
-            .replacingOccurrences(of: "PM", with: " PM")
     }
 
     private var swatches: [EventDisplayTag] {
@@ -97,13 +87,6 @@ struct EventCard: View {
                 )
             }
 
-            if !subtitleParts.isEmpty {
-                Text(subtitleParts.joined(separator: " · "))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.ink.opacity(0.62))
-                    .lineLimit(1)
-            }
-
             if !swatches.isEmpty {
                 FlowChipLayout {
                     ForEach(swatches) { swatch in
@@ -140,47 +123,11 @@ struct EventCard: View {
         try? modelContext.save()
     }
 
-    @ViewBuilder
     private var goingSummary: some View {
-        let visibleFriends = Array(event.friendsGoing.prefix(3))
-
-        if visibleFriends.isEmpty && additionalGoingCount == 0 {
-            HStack(spacing: 8) {
-                if !event.eventMeasurements.hours.isEmpty {
-                    Text(dateTimeText)
-                        .font(.eyebrow)
-                        .foregroundStyle(Color.rust)
-                        .lineLimit(1)
-                }
-
-                Text("No one going yet")
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.ink.opacity(0.62))
-                    .lineLimit(1)
-            }
-        } else {
-            HStack(spacing: 8) {
-                if !event.eventMeasurements.hours.isEmpty {
-                    Text(dateTimeText)
-                        .font(.eyebrow)
-                        .foregroundStyle(Color.rust)
-                        .lineLimit(1)
-                }
-
-                Text(summaryText(for: visibleFriends))
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(Color.ink.opacity(0.62))
-                    .lineLimit(1)
-            }
-        }
-    }
-
-    private func summaryText(for visibleFriends: [String]) -> String {
-        if let firstFriend = visibleFriends.first {
-            return additionalGoingCount > 0 ? "\(firstFriend) + \(additionalGoingCount) going" : "\(firstFriend)'s going"
-        }
-
-        return event.goingCount > 0 ? "\(event.goingCount)+ going" : "No one going yet"
+        Text(dateTimeText)
+            .font(.eyebrow)
+            .foregroundStyle(Color.rust)
+            .lineLimit(1)
     }
 }
 

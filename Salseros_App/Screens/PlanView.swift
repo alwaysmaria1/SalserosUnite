@@ -137,7 +137,7 @@ struct PlanView: View {
     @ViewBuilder
     private var listContent: some View {
         tonightSection
-        eventSection("NEXT WEEK", events: nextWeekEvents)
+        eventSection("THIS WEEK", events: nextWeekEvents)
         emptyStateIfNeeded
     }
 

@@ -96,7 +96,7 @@ struct HomeView: View {
     @ViewBuilder
     private var homeHeader: some View {
         VStack(alignment: .leading, spacing: 14) {
-            Text("Clavé")
+            Text("Clave")
                 .font(.title.weight(.bold))
                 .foregroundStyle(Color.ivory)
                 .frame(maxWidth: .infinity, alignment: .leading)
