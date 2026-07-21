@@ -24,7 +24,7 @@ extension SeedData {
                 venue: venues.latinRhythms,
                 nextDate: date(year: 2026, month: 7, day: 25),
                 cadenceLabel: "weekly",
-                friendsGoing: ["Marisol", "Diego"],
+                friendsGoing: ["Nadia", "Diego"],
                 goingCount: 5,
                 isRSVPed: true,
                 isFavorite: true,
@@ -73,7 +73,7 @@ extension SeedData {
                 venue: venues.drinkNightclub,
                 nextDate: date(year: 2026, month: 7, day: 22),
                 cadenceLabel: "weekly",
-                friendsGoing: ["Marisol", "Diego", "Sam"],
+                friendsGoing: ["Nadia", "Diego", "Sam"],
                 goingCount: 6,
                 isRSVPed: true,
                 eventMeasurements: EventMeasurements(
@@ -87,7 +87,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let studioVivaEvent = event(
             named: "Studio Viva! Rooftop Latin Social",
             existingEvents: existingEvents,
             context: context
@@ -97,7 +97,7 @@ extension SeedData {
                 venue: venues.studioViva,
                 nextDate: date(year: 2026, month: 7, day: 24),
                 cadenceLabel: "special",
-                friendsGoing: ["Marisol"],
+                friendsGoing: ["Nadia"],
                 goingCount: 4,
                 isRSVPed: false,
                 eventMeasurements: EventMeasurements(
@@ -111,7 +111,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let reventonEvent = event(
             named: "Reventón - Noche de Cumbia",
             existingEvents: existingEvents,
             context: context
@@ -135,7 +135,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let oakStreetBeachEvent = event(
             named: "Salsa on Oak Street Beach",
             existingEvents: existingEvents,
             context: context
@@ -145,7 +145,7 @@ extension SeedData {
                 venue: venues.oakStreetBeach,
                 nextDate: date(year: 2026, month: 7, day: 27),
                 cadenceLabel: "summer series",
-                friendsGoing: ["Marisol", "Sam"],
+                friendsGoing: ["Nadia", "Sam"],
                 goingCount: 9,
                 isRSVPed: false,
                 eventMeasurements: EventMeasurements(
@@ -159,7 +159,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let brunchConRitmoEvent = event(
             named: "Brunch Con Ritmo Carnivale",
             existingEvents: existingEvents,
             context: context
@@ -169,7 +169,7 @@ extension SeedData {
                 venue: venues.brunchConRitmo,
                 nextDate: date(year: 2026, month: 7, day: 26),
                 cadenceLabel: "brunch social",
-                friendsGoing: ["Marisol"],
+                friendsGoing: ["Nadia"],
                 goingCount: 4,
                 isRSVPed: false,
                 eventMeasurements: EventMeasurements(
@@ -183,7 +183,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let chicagoBachataEvent = event(
             named: "Chicago Bachata",
             existingEvents: existingEvents,
             context: context
@@ -207,7 +207,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let sensualTuesdaysEvent = event(
             named: "Sensual Tuesdays",
             existingEvents: existingEvents,
             context: context
@@ -231,7 +231,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let bailaTuesdaysEvent = event(
             named: "Baila Tuesdays",
             existingEvents: existingEvents,
             context: context
@@ -241,7 +241,7 @@ extension SeedData {
                 venue: venues.bailaTuesdays,
                 nextDate: date(year: 2026, month: 7, day: 28),
                 cadenceLabel: "weekly",
-                friendsGoing: ["Marisol", "Diego"],
+                friendsGoing: ["Nadia", "Diego"],
                 goingCount: 5,
                 isRSVPed: false,
                 eventMeasurements: EventMeasurements(
@@ -255,7 +255,7 @@ extension SeedData {
             )
         }
 
-        _ = event(
+        let humboldtParkHappyHourEvent = event(
             named: "Latin Dance Happy Hour in Humboldt Park",
             existingEvents: existingEvents,
             context: context
@@ -265,7 +265,7 @@ extension SeedData {
                 venue: venues.humboldtParkHappyHour,
                 nextDate: date(year: 2026, month: 7, day: 29),
                 cadenceLabel: "community social",
-                friendsGoing: ["Sam", "Marisol"],
+                friendsGoing: ["Sam", "Nadia"],
                 goingCount: 6,
                 isRSVPed: false,
                 eventMeasurements: EventMeasurements(
@@ -279,39 +279,81 @@ extension SeedData {
             )
         }
 
-        if !lrDanceSocial.fittings.contains(where: { $0.loggedByName == "You" }) {
+        lrDanceSocial.difficulties = [.intermediate, .advanced]
+        tropicalNightEvent.difficulties = [.beginner, .allWelcome]
+        bailaWednesdaysEvent.difficulties = [.advanced]
+        studioVivaEvent.difficulties = [.beginner, .intermediate]
+        reventonEvent.difficulties = [.intermediate]
+        oakStreetBeachEvent.difficulties = [.beginner, .allWelcome]
+        brunchConRitmoEvent.difficulties = [.allWelcome]
+        chicagoBachataEvent.difficulties = [.intermediate, .advanced]
+        sensualTuesdaysEvent.difficulties = [.beginner]
+        bailaTuesdaysEvent.difficulties = [.intermediate]
+        humboldtParkHappyHourEvent.difficulties = [.beginner, .allWelcome]
+
+        if !lrDanceSocial.fittings.contains(where: { $0.loggedByName == "Nadia" }) {
             context.insert(Fitting(
                 date: lrDanceSocial.nextDate,
                 event: lrDanceSocial,
                 verdict: .toMeasure,
                 vibeTags: [.clubbing],
                 danceStylesTonight: [.mamboOn2, .salsaOn1],
+                difficulties: [.intermediate, .advanced],
                 note: "It was a bit crowded and hard to hear the music but there were some crazy talented people in the room",
-                loggedByName: "You"
+                loggedByName: "Nadia"
             ))
         }
 
-        if !tropicalNightEvent.fittings.contains(where: { $0.loggedByName == "You" }) {
+        if !tropicalNightEvent.fittings.contains(where: { $0.loggedByName == "Sam" }) {
             context.insert(Fitting(
                 date: tropicalNightEvent.nextDate,
                 event: tropicalNightEvent,
                 verdict: .altered,
                 vibeTags: [.clubbing],
                 danceStylesTonight: [.salsaOn1, .bachata],
+                difficulties: [.beginner, .allWelcome],
                 note: "I wish they played more cumbia!!!",
-                loggedByName: "You"
+                loggedByName: "Sam"
             ))
         }
 
-        if !bailaWednesdaysEvent.fittings.contains(where: { $0.loggedByName == "You" }) {
+        if !bailaWednesdaysEvent.fittings.contains(where: { $0.loggedByName == "Diego" }) {
             context.insert(Fitting(
                 date: bailaWednesdaysEvent.nextDate,
                 event: bailaWednesdaysEvent,
                 verdict: .bespoke,
                 vibeTags: [.clubbing, .formal],
                 danceStylesTonight: [.salsaOn1, .bachata],
+                difficulties: [.advanced],
                 note: "It was a chance to dress up so it was a win",
-                loggedByName: "You"
+                loggedByName: "Diego"
+            ))
+        }
+
+        //Nico's own fittings – these fuel the profile's swatch book.
+        if lrDanceSocial.currentUserFitting == nil {
+            context.insert(Fitting(
+                date: date(year: 2026, month: 6, day: 18),
+                event: lrDanceSocial,
+                verdict: .bespoke,
+                vibeTags: [.clubbing],
+                danceStylesTonight: [.mamboOn2, .salsaOn1],
+                difficulties: [.intermediate],
+                note: "Best night in months — floor was electric and I stayed till last song.",
+                loggedByName: UserProfile.currentUserDisplayName
+            ))
+        }
+
+        if tropicalNightEvent.currentUserFitting == nil {
+            context.insert(Fitting(
+                date: date(year: 2026, month: 7, day: 2),
+                event: tropicalNightEvent,
+                verdict: .toMeasure,
+                vibeTags: [.clubbing],
+                danceStylesTonight: [.salsaOn1, .bachata],
+                difficulties: [.beginner, .intermediate],
+                note: "Solid crowd, cream of the crop shows up on Wednesdays.",
+                loggedByName: UserProfile.currentUserDisplayName
             ))
         }
     }

@@ -91,6 +91,23 @@ enum LeadFollowRatio: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+//The role the user identifies as when they dance
+enum DanceRole: String, Codable, CaseIterable, Identifiable {
+    case lead = "Lead"
+    case follow = "Follow"
+
+    var id: String { rawValue }
+
+    var imageName: String {
+        switch self {
+        case .lead:
+            "shoes_lead"
+        case .follow:
+            "shoes_follow"
+        }
+    }
+}
+
 //This is the ranking system
 enum Verdict: String, Codable, CaseIterable, Identifiable {
     case rack = "Rack"
@@ -99,4 +116,18 @@ enum Verdict: String, Codable, CaseIterable, Identifiable {
     case bespoke = "Bespoke"
 
     var id: String { rawValue }
+
+    //Higher value = better verdict. Used to sort the swatch book so peak fittings surface first.
+    var rank: Int {
+        switch self {
+        case .rack:
+            0
+        case .altered:
+            1
+        case .toMeasure:
+            2
+        case .bespoke:
+            3
+        }
+    }
 }

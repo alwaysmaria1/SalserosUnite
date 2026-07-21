@@ -15,25 +15,7 @@ struct FriendFittingCard: View {
     let onSelectEvent: () -> Void
 
     private var relativeDateText: String {
-        let calendar = Calendar.current
-
-        if calendar.isDateInToday(fitting.date) {
-            return "today"
-        }
-
-        if calendar.isDateInYesterday(fitting.date) {
-            return "a day ago"
-        }
-
-        let startOfToday = calendar.startOfDay(for: .now)
-        let startOfDate = calendar.startOfDay(for: fitting.date)
-        let dayCount = calendar.dateComponents([.day], from: startOfDate, to: startOfToday).day ?? 0
-
-        if dayCount > 1 {
-            return "\(dayCount) days ago"
-        }
-
-        return fitting.date.formatted(date: .abbreviated, time: .omitted)
+        "a day ago"
     }
 
     private var initials: String {
@@ -47,6 +29,19 @@ struct FriendFittingCard: View {
 
     private var venueName: String {
         fitting.event.venue?.name ?? "the social"
+    }
+
+    private var reviewImageName: String {
+        switch fitting.loggedByName {
+        case "Nadia":
+            return "Review1_pic"
+        case "Sam":
+            return "review2_pic"
+        case "Diego":
+            return "review3_pic"
+        default:
+            return "Review1_pic"
+        }
     }
 
     private var verdictPhrase: String {
@@ -82,9 +77,12 @@ struct FriendFittingCard: View {
             .padding(.top, 22)
             .padding(.bottom, 16)
 
-            imagePlaceholder
+            reviewThumbnail
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 24)
+                .padding(.bottom, 18)
 
-            VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 12) {
                 Text(fitting.event.name)
                     .font(.cardTitle)
                     .foregroundStyle(Color.ink)
@@ -113,7 +111,6 @@ struct FriendFittingCard: View {
                 }
             }
             .padding(.horizontal, 24)
-            .padding(.top, 18)
             .padding(.bottom, 24)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -130,22 +127,16 @@ struct FriendFittingCard: View {
             .background(Color.teal, in: Circle())
     }
 
-    private var imagePlaceholder: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 8)
-                .fill(Color.teal.opacity(0.14))
-
-            VStack(spacing: 8) {
-                Image(systemName: "photo")
-                    .font(.title2)
-
-                Text("Photo from the night")
-                    .font(.eyebrow)
-            }
-            .foregroundStyle(Color.teal)
-        }
-        .frame(maxWidth: .infinity)
-        .frame(height: 210)
+    private var reviewThumbnail: some View {
+        Image(reviewImageName)
+            .resizable()
+            .scaledToFill()
+            .frame(width: 132, height: 132)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8)
+                    .stroke(Color.ink.opacity(0.12), lineWidth: 1)
+            )
     }
 
     @ViewBuilder

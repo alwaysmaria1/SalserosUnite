@@ -16,4 +16,30 @@ extension Color {
     static let ink = Color(red: 0.06, green: 0.10, blue: 0.18)       // ~#101A2E
     static let mutedIvory = Color.ivory.opacity(0.6)
     static let cardCream = Color(red: 0.97, green: 0.94, blue: 0.88)
+    static let mutedEspresso = Color(red: 0.32, green: 0.22, blue: 0.14)
+}
+
+//Swatch book palette – each verdict earns a color that becomes its "swatch".
+extension Verdict {
+    var swatchColor: Color {
+        switch self {
+        case .bespoke:
+            .teal
+        case .toMeasure:
+            .cardCream
+        case .altered:
+            .rust
+        case .rack:
+            .mutedEspresso
+        }
+    }
+
+    var swatchForegroundColor: Color {
+        switch self {
+        case .toMeasure:
+            .ink
+        case .bespoke, .altered, .rack:
+            .ivory
+        }
+    }
 }

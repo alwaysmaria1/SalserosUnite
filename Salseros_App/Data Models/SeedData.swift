@@ -31,9 +31,11 @@ enum SeedData {
 
     static func makeUserProfile(in context: ModelContext) -> UserProfile {
         let profile = UserProfile(
-            name: "Noe",
+            name: "Nico",
+            role: .lead,
             preferredStyles: [.mamboOn2, .salsaOn1],
-            friendNames: ["Marisol", "Diego", "Sam"]
+            joinDate: date(year: 2024, month: 1, day: 1),
+            friendNames: ["Nadia", "Diego", "Sam"]
         )
         context.insert(profile)
         return profile

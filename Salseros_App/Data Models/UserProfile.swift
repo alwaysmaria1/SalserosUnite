@@ -14,6 +14,7 @@ final class UserProfile {
     static let currentUserDisplayName = "You"
 
     var name: String
+    var role: DanceRole
     var preferredStyles: Set<DanceStyle>
     var joinDate: Date
     var friendNames: [String]
@@ -22,16 +23,34 @@ final class UserProfile {
 
     init(
         name: String = "",
+        role: DanceRole = .lead,
         preferredStyles: Set<DanceStyle> = [],
         joinDate: Date = .now,
         friendNames: [String] = [],
         bookmarkedEvents: [Event] = []
     ) {
         self.name = name
+        self.role = role
         self.preferredStyles = preferredStyles
         self.joinDate = joinDate
         self.friendNames = friendNames
         self.bookmarkedEvents = bookmarkedEvents
+    }
+
+    //Banner tagline like "DANCING ON2 SINCE 2024" – derived from preferred style and join year.
+    var profileTagline: String {
+        let year = Calendar.current.component(.year, from: joinDate)
+        let styleLabel: String
+        if preferredStyles.contains(.mamboOn2) {
+            styleLabel = "ON2"
+        } else if preferredStyles.contains(.salsaOn1) {
+            styleLabel = "ON1"
+        } else if let first = preferredStyles.sorted(by: { $0.rawValue < $1.rawValue }).first {
+            styleLabel = first.rawValue.uppercased()
+        } else {
+            styleLabel = "SALSA"
+        }
+        return "DANCING \(styleLabel) SINCE \(year)"
     }
 
     @MainActor

@@ -16,7 +16,7 @@ private static func seedPlaceholderVenuesAndEventsIfNeeded(context: ModelContext
         venue: mamboCity,
         nextDate: .now,
         cadenceLabel: "biweekly",
-        friendsGoing: ["Marisol", "Diego", "Sam"],
+        friendsGoing: ["Nadia", "Diego", "Sam"],
         goingCount: 7,
         isRSVPed: true,
         isFavorite: true,
@@ -49,7 +49,7 @@ private static func seedPlaceholderVenuesAndEventsIfNeeded(context: ModelContext
         name: "Palladium Night - live orquesta",
         venue: vidaLoca,
         cadenceLabel: "monthly",
-        friendsGoing: ["Marisol"],
+        friendsGoing: ["Nadia"],
         goingCount: 1,
         eventMeasurements: EventMeasurements(
             dressCode: "Dressy, no sneakers",

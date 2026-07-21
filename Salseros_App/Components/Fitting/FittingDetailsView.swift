@@ -37,13 +37,13 @@ struct FittingDetailsView: View {
     private var ratingExplanation: String {
         switch verdict {
         case .rack:
-            return "Easy night, no special prep needed."
+            return "Fine. Nothing special, but you showed up."
         case .altered:
-            return "A good fit with a few adjustments."
+            return "Better than expected. A few good moments."
         case .toMeasure:
-            return "Worth planning around next time."
+            return "Really good. You'd go back without thinking twice."
         case .bespoke:
-            return "Tailor-made for your best night out."
+            return "Perfect fit. One of the best nights out."
         }
     }
 
@@ -53,8 +53,6 @@ struct FittingDetailsView: View {
                 dragHandle
                     .padding(.top, 10)
                     .padding(.bottom, 8)
-
-                floatingEventName
 
                 VStack(alignment: .leading, spacing: 18) {
                     header
@@ -84,34 +82,6 @@ struct FittingDetailsView: View {
         }
     }
 
-    private var floatingEventName: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(eventTitle)
-                .font(.cardTitle)
-                .foregroundStyle(Color.ink)
-                .lineLimit(1)
-
-            if !eventSubtitle.isEmpty {
-                Text(eventSubtitle)
-                    .font(.eyebrow)
-                    .foregroundStyle(Color.ink.opacity(0.62))
-                    .lineLimit(1)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.cardCream, in: RoundedRectangle(cornerRadius: 8))
-        .overlay {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.cardCream.opacity(0.95), lineWidth: 1)
-        }
-        .shadow(color: Color.ink.opacity(0.12), radius: 12, y: 6)
-        .padding(.horizontal, 24)
-        .padding(.bottom, 12)
-        .zIndex(1)
-    }
-
     private var dragHandle: some View {
         Capsule()
             .fill(Color.ink.opacity(0.3))
@@ -120,10 +90,26 @@ struct FittingDetailsView: View {
     }
 
     private var header: some View {
-        HStack {
-            Text("LOG A FITTING")
-                .font(.eyebrow)
-                .foregroundStyle(Color.ink)
+        HStack(alignment: .top) {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("LOG A FITTING")
+                    .font(.eyebrow)
+                    .foregroundStyle(Color.ink)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(eventTitle)
+                        .font(.cardTitle)
+                        .foregroundStyle(Color.ink)
+                        .lineLimit(1)
+
+                    if !eventSubtitle.isEmpty {
+                        Text(eventSubtitle)
+                            .font(.eyebrow)
+                            .foregroundStyle(Color.ink.opacity(0.62))
+                            .lineLimit(1)
+                    }
+                }
+            }
 
             Spacer()
 

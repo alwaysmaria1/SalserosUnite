@@ -20,6 +20,7 @@ final class Event {
     var isRSVPed: Bool             // your real local RSVP state
     var isFavorite: Bool
     var eventMeasurements: EventMeasurements
+    var difficulties: Set<Difficulty> = []
 
     @Relationship(inverse: \Fitting.event)
     var fittings: [Fitting] = []
@@ -34,6 +35,7 @@ final class Event {
         isRSVPed: Bool = false,
         isFavorite: Bool = false,
         eventMeasurements: EventMeasurements = EventMeasurements(),
+        difficulties: Set<Difficulty> = [],
         fittings: [Fitting] = []
     ) {
         self.name = name
@@ -45,6 +47,7 @@ final class Event {
         self.isRSVPed = isRSVPed
         self.isFavorite = isFavorite
         self.eventMeasurements = eventMeasurements
+        self.difficulties = difficulties
         self.fittings = fittings
     }
 
@@ -75,7 +78,7 @@ final class Event {
     }
 
     var allDifficulties: Set<Difficulty> {
-        allFittings.reduce(into: Set<Difficulty>()) { $0.formUnion($1.difficulties) }
+        allFittings.reduce(into: difficulties) { $0.formUnion($1.difficulties) }
     }
 
     var averageLeadFollowRatio: LeadFollowRatio? {

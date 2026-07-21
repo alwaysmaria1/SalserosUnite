@@ -108,15 +108,7 @@ struct EventDetailsScreen: View {
     private var hero: some View {
         ZStack {
             Rectangle()
-                .fill(Color.ink.opacity(0.26))
-                .overlay {
-                    DiagonalStripePattern()
-                        .stroke(Color.ink.opacity(0.14), lineWidth: 8)
-                }
-
-            Text("VENUE PHOTO")
-                .font(.eyebrow)
-                .foregroundStyle(Color.ivory.opacity(0.58))
+                .fill(Color.ink.opacity(0.72))
 
             HStack {
                 circleIconButton("chevron.left", action: { dismiss() })
@@ -132,7 +124,7 @@ struct EventDetailsScreen: View {
             .padding(.top, 68)
             .frame(maxHeight: .infinity, alignment: .top)
         }
-        .frame(height: 220)
+        .frame(height: 110)
         .padding(.horizontal, -24)
     }
 
@@ -165,7 +157,13 @@ struct EventDetailsScreen: View {
     }
 
     private var nextEventSection: some View {
-        goingCard
+        VStack(alignment: .leading, spacing: 10) {
+            Text("NEXT UPCOMING EVENT")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(Color.ivory)
+
+            goingCard
+        }
     }
 
     private var goingCard: some View {
@@ -403,20 +401,4 @@ struct EventDetailsScreen: View {
         .buttonStyle(.plain)
     }
 
-}
-
-private struct DiagonalStripePattern: Shape {
-    func path(in rect: CGRect) -> Path {
-        var path = Path()
-        let spacing: CGFloat = 18
-        var x = -rect.height
-
-        while x < rect.width {
-            path.move(to: CGPoint(x: x, y: rect.maxY))
-            path.addLine(to: CGPoint(x: x + rect.height, y: rect.minY))
-            x += spacing
-        }
-
-        return path
-    }
 }
